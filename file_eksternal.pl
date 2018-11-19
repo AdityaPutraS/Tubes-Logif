@@ -10,7 +10,7 @@ baca_file(NamaFile,Isi) :-
 	open(NamaFile,read,S),
 	repeat,
 	readData(S,Isi),
-	close(S).
+	close(S),!.
 /*-----------------------------*/
 /* Write ke file eksternal */
 writeData(_,[]) :- !.

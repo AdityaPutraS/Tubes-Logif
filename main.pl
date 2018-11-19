@@ -7,20 +7,7 @@
 */
 
 /* Include */
-:- include('file_eksternal.pl').
-:- include('utility.pl').
-:- include('barang.pl').
-:- include('musuh.pl').
-:- include('player.pl').
-/*-----------------------------*/
-:- dynamic(peta/1).
-
-init_map :-
-	baca_file('peta.txt',P),
-	retract(peta(_)),
-	asserta(peta(P)),
-	player(X,Y),
-	setPixel(X,Y,'P').
+:- include('peta.pl').
 /*-----------------------------*/
 /* Command Biasa */
 start :-
@@ -48,18 +35,8 @@ look :-
 
 
 map :-
-	peta(X), printList(X),!.
+	peta(X), printList2D(X),!.
 
-/* Grafika */
-setPixel(X,Y,C) :-
-	retract(peta(L)),
-	Pos is (X*2 + Y*24),
-	change(L,LBaru,C,Pos),
-	asserta(peta(LBaru)).
-getPixel(X,Y,C) :-
-	peta(L),
-	Pos is (X*2 + Y*24),
-	ambil(L,Pos,C).
 getObjek(X,Y,'Musuh') :- !.
 	/*musuh(Id,XPos,YPos,Damage,Health,ItemDrop),!.*/
 /* Movement */

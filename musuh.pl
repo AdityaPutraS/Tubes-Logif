@@ -77,18 +77,20 @@ updateAksiMusuh([Id|Tail]) :-
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     player(Xp,Yp),
     Xm =:= Xp, Ym =:= Yp,
-    serang(Damage),
+    serangPlayer(Damage),
     updateAksiMusuh(Tail),!.
 updateAksiMusuh([_|Tail]) :-
     updateAksiMusuh(Tail),!.
 
-serang(Damage) :- 
+serangPlayer(Damage) :- 
     healthpoint(Darah),
     Darah > Damage,
-    retract(healthpoint(_)),
     DarahBaru is Darah-Damage,
-    asserta(healthpoint(DarahBaru)), !.
-serang(Damage) :-
+    retract(healthpoint(_)),
+    asserta(healthpoint(DarahBaru)),
+    write('Kamu baru saja diserang oleh musuh.'),nl,
+    write('Sisa darahmu : '),write(DarahBaru),nl,!.
+serangPlayer(Damage) :-
     healthpoint(Darah),
     Darah =< Damage,
     kalah, !. 
