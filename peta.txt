@@ -1,0 +1,17 @@
+XXXXXXXXXXXXXXXXXXXXXXX
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+X - - - - - - - - - - X
+XXXXXXXXXXXXXXXXXXXXXXX
+
+24/ baris
+0,0 -> 26
+
+(X+1)*2 + (Y+1)*24

@@ -46,52 +46,94 @@ search([_|Tail],C,IndexBaru) :-  search(Tail,C,Index),IndexBaru is Index+1.
 change([_|Tail],[C|Tail],C,0) :- !. 
 change([A|Tail],[A|LBaru],C,Indeks) :- IndeksBaru is Indeks-1, change(Tail,LBaru,C,IndeksBaru).
 
+/* ambil(L,Pos,C) */
+ambil([],0,'') :- !.
+ambil([C|_],0,C) :- !.
+ambil([_|LTail],Pos,C) :- PosBaru is (Pos-1),ambil(LTail,PosBaru,C), !.
+
 /* Print Map */
 printList([]) :- !.
 printList([A|Tail]) :-
 	write(A), printList(Tail).
 
 map :-
-	retract(peta(X)), printList(X),!.
+	retract(peta(X)), printList(X),asserta(peta(X)),!.
 /*-----------------------------*/
 
 start :-
 	write('PUBG.'),nl,nl,nl,
-	asserta(player(5,5)),
+	asserta(player(6,5)),
 	asserta(darah(100)),
 	asserta(inventory([])),
 	asserta(senjata(none)),
 	asserta(armor(none)),
 	asserta(peta([])),
-	baca_map,setPixel(5,5,'P'),
+	baca_map,setPixel(6,5,'P'),
 	write('yes'),nl.
-/* Player */
+/* Grafika */
 setPixel(X,Y,C) :-
 	retract(peta(L)),
-	Pos is (Y*20+X),
+	Pos is (X*2 + Y*24),
 	change(L,LBaru,C,Pos),
 	asserta(peta(LBaru)).
-
+getPixel(X,Y,C) :-
+	retract(peta(L)),
+	Pos is (X*2 + Y*24),
+	ambil(L,Pos,C),
+	asserta(peta(L)).
 /* Movement */
 n :- 
 	retract(player(X,Y)),
-	X =:= 0,
 	asserta(player(X,Y)),
+	Y =:= 1,
 	write('Gabisa Cok!'),nl, !.
 n :-
 	retract(player(X,Y)),
 	write([X,Y]),nl,
-	X > 0,
+	Y > 1,
+	setPixel(X,Y,'-'),
+	YBaru is Y-1,
+	setPixel(X,YBaru,'P'),
+	asserta(player(X,YBaru)),!.
+e  :- 
+	retract(player(X,Y)),
+	asserta(player(X,Y)),
+	X =:= 10,
+	write('Gabisa Cok!'),nl, !.
+e :-
+	retract(player(X,Y)),
+	write([X,Y]),nl,
+	X < 10,
+	setPixel(X,Y,'-'),
+	XBaru is X+1,
+	setPixel(XBaru,Y,'P'),
+	asserta(player(XBaru,Y)),!.
+w :- 
+	retract(player(X,Y)),
+	asserta(player(X,Y)),
+	X =:= 1,
+	write('Gabisa Cok!'),nl, !.
+w :-
+	retract(player(X,Y)),
+	write([X,Y]),nl,
+	X > 1,
 	setPixel(X,Y,'-'),
 	XBaru is X-1,
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),!.
-e :-
-	retract(player(X,Y)), YBaru is Y+1, asserta(player(X,YBaru)).
-w :-
-	retract(player(X,Y)), YBaru is Y-1, asserta(player(X,YBaru)).
+s :- 
+	retract(player(X,Y)),
+	asserta(player(X,Y)),
+	Y =:= 10,
+	write('Gabisa Cok!'),nl, !.
 s :-
-	retract(player(X,Y)), XBaru is X+1, asserta(player(XBaru,Y)).
+	retract(player(X,Y)),
+	write([X,Y]),nl,
+	Y < 10,
+	setPixel(X,Y,'-'),
+	YBaru is Y+1,
+	setPixel(X,YBaru,'P'),
+	asserta(player(X,YBaru)),!.
 /*-----------------------------*/
 
 /* Test Fungsi Attack */
