@@ -58,7 +58,8 @@ quit :-
 	retract(senjata(_)),
 	retract(armor(_)),
 	retract(peta(_)),
-	write('Game selesai.'),nl,!.
+	write('Game selesai.'),nl,
+	write('ArigaThanks :3'),!.
 
 look :-
 	player(X,Y),
