@@ -36,6 +36,22 @@ getPixel(X,Y,C) :-
     ambil(P,Y,PBaris),
     ambil(PBaris,X,C),!.
 
+isDeadzone(X,Y) :-
+    deadzone(DZ),
+    lebarPeta(L),
+    tinggiPeta(T),
+    NotDZXMin is DZ+1,
+    NotDZYMin is DZ+1,
+    NotDZXMax is L-DZ,
+    NotDZYMax is T-DZ,
+    (   
+        Y < NotDZYMin;
+        Y > NotDZYMax;   
+        X < NotDZXMin;
+        X > NotDZXMax
+    ),
+    !.
+
 incDeadzone :-
     retract(deadzone(DZ)),
     DZBaru is DZ+1,
