@@ -30,9 +30,30 @@ quit :-
 	retract(peta(_)),
 	write('Game selesai.'),nl,!.
 
-look :-
+look :-	
+	player(X,Y),
+	forall(between(X-1,X+1,I), (
+		forall(between(Y-1,Y+1,J), (
+			printPrio(I,J)
+		)),
+		nl
+	)),
 	!.
 
+printPrio(X,Y) :-
+	musuh(_,X,Y,_,_,_),!, write('E').
+printPrio(X,Y) :-
+	isMedicine(Nama,_), barang(_,Nama,X,Y), !, write('O').
+printPrio(X,Y) :-
+	isSenjata(Nama,_), barang(_,Nama,X,Y), !, write('S').
+printPrio(X,Y) :-
+	isArmor(Nama,_), barang(_,Nama,X,Y), !, write('A').
+printPrio(X,Y) :-
+	isAmmo(Nama,_), barang(_,Nama,X,Y), !, write('M').
+printPrio(X,Y) :-
+	player(X,Y), !, write('P').
+printPrio(X,Y) :-
+	write('-').
 
 map :-
 	peta(X), printList2D(X),!.
