@@ -5,29 +5,50 @@
 :- dynamic(lebarPeta/1).
 :- dynamic(tinggiPeta/1).
 :- dynamic(peta/1).
+:- dynamic(petaBackup/1).
 
 init_map :-
     baca_file('peta.txt',P),
     splitList(P,'\n',PBaru),
-    asserta(peta(P)),
-	retract(peta(_)),
     asserta(peta(PBaru)),
-    asserta(lebarPeta(26)),asserta(tinggiPeta(10)),
-    retract(lebarPeta(_)),retract(tinggiPeta(_)),
+    asserta(petaBackup(PBaru)),
+    asserta(deadzone(0)),
     asserta(lebarPeta(26)),asserta(tinggiPeta(10)),!.
 
+reset_map :-
+    petaBackup(PBaru),
+	retract(peta(_)),
+    asserta(peta(PBaru)),!.
+
 setPixel(X,Y,C) :-
+    lebarPeta(Le),tinggiPeta(Ti),
+    X>=0,X=<Le,Y>=0,Y=<Ti,!,
     peta(P),
     ambil(P,Y,PBaris),
     change(PBaris,PBarisBaru,C,X),
     change(P,PBaru,PBarisBaru,Y),
     retract(peta(_)),
-    asserta(peta(PBaru)),
-    !.
+    asserta(peta(PBaru)),!.
 getPixel(X,Y,C) :-
+    lebarPeta(Le),tinggiPeta(Ti),
+    X>=0,X=<Le,Y>=0,Y=<Ti,!,
     peta(P),
     ambil(P,Y,PBaris),
     ambil(PBaris,X,C),!.
+
+incDeadzone :-
+    retract(deadzone(DZ)),
+    DZBaru is DZ+1,
+    asserta(deadzone(DZBaru)),!.
+
+gambarDeadzone(0) :- !.
+gambarDeadzone(DZ) :-
+    lebarPeta(Le),tinggiPeta(Ti),
+    XMin is DZ, XMax is Le-DZ+1,
+    YMin is DZ, YMax is Ti-DZ+1,
+    forall(between(XMin,XMax,X),(setPixel(X,YMin,'X'),setPixel(X,YMax,'X'))),
+    forall(between(YMin,YMax,Y),(setPixel(XMin,Y,'X'),setPixel(XMax,Y,'X'))),
+    DZBaru is DZ-1, gambarDeadzone(DZBaru),!.
 
 gambarPlayer :-
     player(X,Y),
@@ -47,9 +68,11 @@ gambarMusuh([Id|Tail]) :-
     gambarMusuh(Tail), !.
 
 updatePeta :-
-    init_map,
+    reset_map,
     findall(M, musuh(M,_,_,_,_,_), ListIdMusuh),
     findall(B, barang(B,_,_,_), ListIdBarang),
+    deadzone(DZ),
+    gambarDeadzone(DZ),
     gambarPlayer,
     gambarObjek(ListIdBarang),
     gambarMusuh(ListIdMusuh),!.
