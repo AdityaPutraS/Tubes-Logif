@@ -52,8 +52,12 @@ quit :-
 
 look :-	
 	player(X,Y),
-	forall(between(X-1,X+1,I), (
-		forall(between(Y-1,Y+1,J), (
+	XMin is X-1,
+	XMax is X+1,
+	YMin is Y-1,
+	YMax is Y+1,
+	forall(between(YMin,YMax,J), (
+		forall(between(XMin,XMax,I), (
 			printPrio(I,J)
 		)),
 		nl
