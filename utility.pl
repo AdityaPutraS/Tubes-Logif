@@ -22,7 +22,7 @@ hapus([Head|Tail],[Head|Hasil],Indeks) :- IndeksBaru is Indeks-1, hapus(Tail,Has
 /* printList(List). */
 printList([]) :- !.
 printList([A|Tail]) :-
-	write(A),write(' '), printList(Tail),!.
+	write(A), printList(Tail),!.
 
 printList2D([]) :- !.
 printList2D([A|Tail]) :-
