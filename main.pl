@@ -15,12 +15,22 @@ update :-
 
 start :-
 	write('PUBG.'),nl,
+	write(' _____    _    _   ____     _____ '),nl,
+	write('|  __ \\  | |  | | |  _ \\   / ____|'),nl,
+	write('| |__) | | |  | | | |_) | | |  __'),nl,
+	write('|  ___/  | |  | | |  _ <  | | |_ |'),nl,
+	write('| |      | |__| | | |_) | | |__| |'),nl,
+	write('|_|       \\____/  |____/   \\_____|'),nl,
 	write('Game Mulai'),nl,
+	write('  _   _          _   _ '),nl,
+	write(' | | | |__ __ __| | | |'),nl,
+ 	write(' | |_| |\\ V  V /| |_| |'),nl,
+  write('  \\___/  \\_/\\_/  \\___/ '),nl,
 	init_player,
 	init_map,
 	init_barang,
 	initMusuh(10),
-	updatePeta,!. 
+	updatePeta,!.
 
 help :-
 	write('Daftar Command : '),nl,
@@ -50,7 +60,7 @@ quit :-
 	retract(peta(_)),
 	write('Game selesai.'),nl,!.
 
-look :-	
+look :-
 	player(X,Y),
 	forall(between(X-1,X+1,I), (
 		forall(between(Y-1,Y+1,J), (
@@ -92,7 +102,7 @@ n :-
 	YBaru is Y-1,
 	setPixel(X,YBaru,'P'),
 	asserta(player(X,YBaru)),update,!.
-e  :- 
+e  :-
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
@@ -106,7 +116,7 @@ e :-
 	XBaru is X+1,
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),update,!.
-w :- 
+w :-
 	player(X,_),
 	X =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
@@ -118,7 +128,7 @@ w :-
 	XBaru is X-1,
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),update,!.
-s :- 
+s :-
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,
