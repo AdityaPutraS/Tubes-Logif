@@ -10,17 +10,20 @@
 :- include('peta.pl').
 /*-----------------------------*/
 /* Command Biasa */
-update :-
-	updateMusuh, updatePeta, !.
-
 start :-
-	write('PUBG.'),nl,
+	write(' _____    _    _   ____     _____ '),nl,
+	write('|  __ \\  | |  | | |  _ \\   / ____|'),nl,
+	write('| |__) | | |  | | | |_) | | |  __'),nl,
+	write('|  ___/  | |  | | |  _ <  | | |_ |'),nl,
+	write('| |      | |__| | | |_) | | |__| |'),nl,
+	write('|_|       \\____/  |____/   \\_____|'),nl,
 	write('Game Mulai'),nl,
+	write('  _   _          _   _ '),nl,
+	write(' | | | |__ __ __| | | |'),nl,
+ 	write(' | |_| |\\ V  V /| |_| |'),nl,
+  write('  \\___/  \\_/\\_/  \\___/ '),nl,
 	init_player,
-	init_map,
-	init_barang,
-	initMusuh(10),
-	updatePeta,!. 
+	updatePeta,!.
 
 help :-
 	write('Daftar Command : '),nl,
@@ -57,19 +60,19 @@ getObjek(X,Y,'Musuh') :- !.
 n :-
 	player(_,Y),
 	Y =:= 1,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Gabisa Cok!'),nl, !.
 n :-
 	retract(player(X,Y)),
 	Y > 1,
 	setPixel(X,Y,'-'),
 	YBaru is Y-1,
 	setPixel(X,YBaru,'P'),
-	asserta(player(X,YBaru)),update,!.
-e  :- 
+	asserta(player(X,YBaru)),!.
+e  :-
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Gabisa Cok!'),nl, !.
 e :-
 	retract(player(X,Y)),
 	write([X,Y]),nl,
@@ -78,11 +81,11 @@ e :-
 	setPixel(X,Y,'-'),
 	XBaru is X+1,
 	setPixel(XBaru,Y,'P'),
-	asserta(player(XBaru,Y)),update,!.
-w :- 
+	asserta(player(XBaru,Y)),!.
+w :-
 	player(X,_),
 	X =:= 1,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Gabisa Cok!'),nl, !.
 w :-
 	retract(player(X,Y)),
 	write([X,Y]),nl,
@@ -90,12 +93,12 @@ w :-
 	setPixel(X,Y,'-'),
 	XBaru is X-1,
 	setPixel(XBaru,Y,'P'),
-	asserta(player(XBaru,Y)),update,!.
-s :- 
+	asserta(player(XBaru,Y)),!.
+s :-
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Gabisa Cok!'),nl, !.
 s :-
 	retract(player(X,Y)),
 	write([X,Y]),nl,
@@ -104,5 +107,13 @@ s :-
 	setPixel(X,Y,'-'),
 	YBaru is Y+1,
 	setPixel(X,YBaru,'P'),
-	asserta(player(X,YBaru)),update,!.
+	asserta(player(X,YBaru)),!.
+/*-----------------------------*/
+
+/* Test Fungsi Attack */
+setDarah(Darah) :-
+	asserta(darah(Darah)).
+
+kenaSerang(Damage) :-
+	retract(darah(X)), XBaru is X-Damage, asserta(darah(XBaru)).
 /*-----------------------------*/
