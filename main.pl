@@ -41,7 +41,13 @@ help :-
 	write('14. load : Membuka save-an pemain.'),nl,!.
 
 quit :-
-	retractall(_),
+	retract(player(_,_)),
+	retract(healthpoint(_)),
+	retract(armorpoint(_)),
+	retract(inventory(_)),
+	retract(senjata(_)),
+	retract(armor(_)),
+	retract(peta(_)),
 	write('Game selesai.'),nl,!.
 
 look :-
