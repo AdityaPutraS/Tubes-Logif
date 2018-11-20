@@ -11,23 +11,40 @@
 /*-----------------------------*/
 /* Command Biasa */
 start :-
-	write('PUBG.'),nl,
+	write(' _____    _    _   ____     _____ '),nl,
+	write('|  __ \\  | |  | | |  _ \\   / ____|'),nl,
+	write('| |__) | | |  | | | |_) | | |  __'),nl,
+	write('|  ___/  | |  | | |  _ <  | | |_ |'),nl,
+	write('| |      | |__| | | |_) | | |__| |'),nl,
+	write('|_|       \\____/  |____/   \\_____|'),nl,
 	write('Game Mulai'),nl,
+	write('  _   _          _   _ '),nl,
+	write(' | | | |__ __ __| | | |'),nl,
+ 	write(' | |_| |\\ V  V /| |_| |'),nl,
+  write('  \\___/  \\_/\\_/  \\___/ '),nl,
 	init_player,
-	updatePeta,!. 
+	updatePeta,!.
 
 help :-
 	write('Daftar Command : '),nl,
-	write('1. start : memulai permainan.'),nl,!.
+	write('1. start : memulai permainan.'),nl,
+	write('2. map : Menampilkan peta.'),nl,
+	write('3. look : Menampilkan peta 3x3 yang lebih detil.'),nl,
+	write('4. n : Bergerak kearah Utara(atas).'),nl,
+	write('5. e : Bergerak kearah Timur(kanan).'),nl,
+	write('6. w : Bergerak kearah Barat(kiri).'),nl,
+	write('7. s : Bergerak kearah Selatan(bawah).'),nl,
+	write('8. quit : Keluar dari permainan.'),nl,
+	write('9. take(object) : Mengambil object pada petak.'),nl,
+	write('10. drop(object) : Membuang sebuah object dari inventory.'),nl,
+	write('11. use(object) : Menggunakan sebuah object yang dalam inventori.'),nl,
+	write('12. attack : Menyerang enemy dalam petak sama.'),nl,
+	write('13. status : Melihat status diri.'),nl,
+	write('13. save : Menyimpan permainan pemain.'),nl,
+	write('14. load : Membuka save-an pemain.'),nl,!.
 
 quit :-
-	retract(player(_,_)),
-	retract(healthpoint(_)),
-	retract(armorpoint(_)),
-	retract(inventory(_)),
-	retract(senjata(_)),
-	retract(armor(_)),
-	retract(peta(_)),
+	retractall(_),
 	write('Game selesai.'),nl,!.
 
 look :-	
@@ -61,7 +78,7 @@ map :-
 getObjek(X,Y,'Musuh') :- !.
 	/*musuh(Id,XPos,YPos,Damage,Health,ItemDrop),!.*/
 /* Movement */
-n :- 
+n :-
 	player(_,Y),
 	Y =:= 1,
 	write('Gabisa Cok!'),nl, !.
@@ -72,7 +89,7 @@ n :-
 	YBaru is Y-1,
 	setPixel(X,YBaru,'P'),
 	asserta(player(X,YBaru)),!.
-e  :- 
+e  :-
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
@@ -86,7 +103,7 @@ e :-
 	XBaru is X+1,
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),!.
-w :- 
+w :-
 	player(X,_),
 	X =:= 1,
 	write('Gabisa Cok!'),nl, !.
@@ -98,7 +115,7 @@ w :-
 	XBaru is X-1,
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),!.
-s :- 
+s :-
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,

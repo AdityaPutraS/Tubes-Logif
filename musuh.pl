@@ -50,7 +50,8 @@ nMusuh(Id) :-
     eMusuh(Id),!.
 eMusuh(Id) :- 
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
-    Xm < 10,
+    lebarPeta(Le),
+    Xm < Le,
     XmBaru is Xm+1,
     retract(musuh(Id,_,_,_,_,_)),
     assertz(musuh(Id,XmBaru,Ym,Damage,Health,ItemDrop)),!.
@@ -58,7 +59,8 @@ eMusuh(Id) :-
     wMusuh(Id),!.
 wMusuh(Id) :- 
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
-    Ym < 10,
+    tinggiPeta(Ti),
+    Ym < Ti,
     YmBaru is Ym+1,
     retract(musuh(Id,_,_,_,_,_)),
     assertz(musuh(Id,Xm,YmBaru,Damage,Health,ItemDrop)),!.
