@@ -24,9 +24,11 @@ isAmmo(sniper_rifle_ammo,100).
 isAmmo(mp5_ammo,100).
 /*-----------------------------*/
 
-/* barang(Nama,X,Y). */
-barang(chainmail,2,3).
-barang(ak47_ammo,2,3).
-barang(ak47,8,2).
-barang(betadine,3,9).
-barang(tshirt,1,1).
+/* barang(Id,Nama,X,Y). */
+:- dynamic(barang/4).
+init_barang :-
+    asserta(barang(1,chainmail,2,3)),
+    asserta(barang(2,ak47_ammo,2,3)),
+    asserta(barang(3,ak47,8,2)),
+    asserta(barang(4,betadine,3,9)),
+    asserta(barang(5,tshirt,1,1)).

@@ -7,8 +7,9 @@
 
 initMusuh(0) :- !.
 initMusuh(Banyak) :-
-    random(1, 10, X),
-    random(1, 10, Y),
+    lebarPeta(Le),tinggiPeta(Ti),
+    random(1, Le, X),
+    random(1, Ti, Y),
     findall(S,isSenjata(S,_),ListSenjata),
     length(ListSenjata, Panjang),
     random(0,Panjang,NoSenjata),

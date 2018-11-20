@@ -14,7 +14,7 @@ start :-
 	write('PUBG.'),nl,
 	write('Game Mulai'),nl,
 	init_player,
-	init_map,!. 
+	updatePeta,!. 
 
 help :-
 	write('Daftar Command : '),nl,
@@ -53,12 +53,14 @@ n :-
 	asserta(player(X,YBaru)),!.
 e  :- 
 	player(X,_),
-	X =:= 10,
+	lebarPeta(Le),
+	X =:= Le,
 	write('Gabisa Cok!'),nl, !.
 e :-
 	retract(player(X,Y)),
 	write([X,Y]),nl,
-	X < 10,
+	lebarPeta(Le),
+	X < Le,
 	setPixel(X,Y,'-'),
 	XBaru is X+1,
 	setPixel(XBaru,Y,'P'),
@@ -77,12 +79,14 @@ w :-
 	asserta(player(XBaru,Y)),!.
 s :- 
 	player(_,Y),
-	Y =:= 10,
+	tinggiPeta(Ti),
+	Y =:= Ti,
 	write('Gabisa Cok!'),nl, !.
 s :-
 	retract(player(X,Y)),
 	write([X,Y]),nl,
-	Y < 10,
+	tinggiPeta(Ti),
+	Y < Ti,
 	setPixel(X,Y,'-'),
 	YBaru is Y+1,
 	setPixel(X,YBaru,'P'),
