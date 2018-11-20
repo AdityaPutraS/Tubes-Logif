@@ -4,8 +4,10 @@
 :- dynamic(inventory/1).
 :- dynamic(armor/1).
 :- dynamic(senjata/1).
+:- dynamic(gameMain/1).
 
 init_player :-
+	asserta(gameMain(1)),
 	asserta(player(6,5)),
 	asserta(healthpoint(100)),
 	asserta(armorpoint(0)),
@@ -13,4 +15,6 @@ init_player :-
 	asserta(senjata(none)),
 	asserta(armor(none)).
 
-kalah :- !.
+kalah :- 
+	retract(gameMain(_)),
+	asserta(gameMain(0)),!.

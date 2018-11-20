@@ -51,6 +51,7 @@ help :-
 	write('14. load : Membuka save-an pemain.'),nl,!.
 
 quit :-
+	gameMain(GM), GM =:= 1,
 	retract(player(_,_)),
 	retract(healthpoint(_)),
 	retract(armorpoint(_)),
@@ -58,9 +59,12 @@ quit :-
 	retract(senjata(_)),
 	retract(armor(_)),
 	retract(peta(_)),
-	write('Game selesai.'),nl,!.
+	write('Game selesai.'),nl,
+	retract(gameMain(_)),
+	asserta(gameMain(0)),!.
 
 look :-
+	gameMain(GM), GM =:= 1,
 	player(X,Y),
 	XMin is X-1,
 	XMax is X+1,
@@ -90,16 +94,19 @@ printPrio(X,Y) :-
 	write('-').
 
 map :-
+	gameMain(GM), GM =:= 1,
 	peta(X), printList2D(X),!.
 
 getObjek(X,Y,'Musuh') :- !.
 	/*musuh(Id,XPos,YPos,Damage,Health,ItemDrop),!.*/
 /* Movement */
 n :-
+	gameMain(GM), GM =:= 1,
 	player(_,Y),
 	Y =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
 n :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	Y > 1,
 	setPixel(X,Y,'-'),
@@ -107,11 +114,13 @@ n :-
 	setPixel(X,YBaru,'P'),
 	asserta(player(X,YBaru)),update,!.
 e  :-
+	gameMain(GM), GM =:= 1,
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
 	write('Gabisa Cok!'),nl,update,!.
 e :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	write([X,Y]),nl,
 	lebarPeta(Le),
@@ -121,10 +130,12 @@ e :-
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),update,!.
 w :-
+	gameMain(GM), GM =:= 1,
 	player(X,_),
 	X =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
 w :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	write([X,Y]),nl,
 	X > 1,
@@ -133,11 +144,13 @@ w :-
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),update,!.
 s :-
+	gameMain(GM), GM =:= 1,
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,
 	write('Gabisa Cok!'),nl,update,!.
 s :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	write([X,Y]),nl,
 	tinggiPeta(Ti),

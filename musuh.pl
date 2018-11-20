@@ -27,18 +27,82 @@ updateMusuh :-
 updatePosisiMusuh([]) :- !.
 updatePosisiMusuh([Id|Tail]) :-
     random(1,100,MovAcak),
-    Movement is (MovAcak mod 4)+1,
-    gerakMusuh(Id,Movement),
+    tentukanAksi(Id,MovAcak),
     updatePosisiMusuh(Tail),!.
 
-gerakMusuh(Id,1) :-
-    nMusuh(Id),!.
-gerakMusuh(Id,2) :-
-    eMusuh(Id),!.
-gerakMusuh(Id,3) :-
-    wMusuh(Id),!.
-gerakMusuh(Id,4) :-
-    sMusuh(Id),!.
+tentukanAksi(_,Mov) :-
+    Mov > 75, !.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm =:= Xp,Ym =:= Yp, !.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm =:= Xp,Ym > Yp,
+    random(1,100,Gerak), G is (Gerak mod 2),
+    (
+        (G =:= 0, nMusuh(Id));
+        (G =:= 1)    
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm =:= Xp,Ym < Yp,
+    random(1,100,Gerak), G is (Gerak mod 2),
+    (
+        (G =:= 0, sMusuh(Id));
+        (G =:= 1)    
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm < Xp,Ym =:= Yp,
+    random(1,100,Gerak), G is (Gerak mod 2),
+    (
+        (G =:= 0, eMusuh(Id));
+        (G =:= 1)    
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm > Xp,Ym =:= Yp,
+    random(1,100,Gerak), G is (Gerak mod 2),
+    (
+        (G =:= 0, wMusuh(Id));
+        (G =:= 1)    
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm < Xp,Ym < Yp,
+    random(1,100,Gerak), G is (Gerak mod 3),
+    (
+        (G =:= 0,sMusuh(Id));
+        (G =:= 1,eMusuh(Id));
+        (G =:= 2)
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm < Xp,Ym > Yp,
+    random(1,100,Gerak), G is (Gerak mod 3),
+    (
+        (G =:= 0,nMusuh(Id));
+        (G =:= 1,eMusuh(Id));
+        (G =:= 2)
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm > Xp,Ym < Yp,
+    random(1,100,Gerak), G is (Gerak mod 3),
+    (
+        (G =:= 0,sMusuh(Id));
+        (G =:= 1,wMusuh(Id));
+        (G =:= 2)
+    ),!.
+tentukanAksi(Id,_) :-
+    musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
+    Xm > Xp,Ym > Yp,
+    random(1,100,Gerak), G is (Gerak mod 3),
+    (
+        (G =:= 0,nMusuh(Id));
+        (G =:= 1,wMusuh(Id));
+        (G =:= 2)
+    ),!.
 
 nMusuh(Id) :- 
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
@@ -47,7 +111,7 @@ nMusuh(Id) :-
     retract(musuh(Id,_,_,_,_,_)),
     assertz(musuh(Id,Xm,YmBaru,Damage,Health,ItemDrop)),!.
 nMusuh(Id) :-
-    eMusuh(Id),!.
+    sMusuh(Id),!.
 eMusuh(Id) :- 
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     lebarPeta(Le),
@@ -59,19 +123,19 @@ eMusuh(Id) :-
     wMusuh(Id),!.
 wMusuh(Id) :- 
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
+    Xm > 1,
+    XmBaru is Xm-1,
+    retract(musuh(Id,_,_,_,_,_)),
+    assertz(musuh(Id,XmBaru,Ym,Damage,Health,ItemDrop)),!.
+wMusuh(Id) :-
+    eMusuh(Id),!.
+sMusuh(Id) :- 
+    musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     tinggiPeta(Ti),
     Ym < Ti,
     YmBaru is Ym+1,
     retract(musuh(Id,_,_,_,_,_)),
     assertz(musuh(Id,Xm,YmBaru,Damage,Health,ItemDrop)),!.
-wMusuh(Id) :-
-    sMusuh(Id),!.
-sMusuh(Id) :- 
-    musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
-    Xm > 1,
-    XmBaru is Xm-1,
-    retract(musuh(Id,_,_,_,_,_)),
-    assertz(musuh(Id,XmBaru,Ym,Damage,Health,ItemDrop)),!.
 sMusuh(Id) :-
     nMusuh(Id),!.
 
