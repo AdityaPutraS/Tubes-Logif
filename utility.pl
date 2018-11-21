@@ -58,5 +58,16 @@ listToStr([C|Tail],S) :-
 	listToStr(Tail,S2),
 	atom_concat(C, S2, S),!.
 	
+/* appendList(L,X,LHasil) */
+appendList(L,X,[X|L]).
 
+/* concatList(L1,L2,L3) */
+concatList([],L,L) :- !.
+concatList([Head|Tail],L,Hasil) :-
+	concatList(Tail,L,Temp),
+	appendList(Temp,Head,Hasil),!.
 
+/* PAIR */
+make_pair(First,Second,[First,Second]).
+first([First|_],First).
+second([_,Second],Second).

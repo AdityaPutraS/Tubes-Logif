@@ -1,5 +1,4 @@
 :- include('barang.pl').
-:- include('utility.pl').
 :- include('player.pl').
 :- dynamic(musuh/6).
 
@@ -139,21 +138,21 @@ sMusuh(Id) :-
     nMusuh(Id),!.
 
 serangPlayer(Damage) :-
-    armorpoint(Armor),
+    armor(Armor),
     Armor > 0,Armor >= Damage,
     ArmorBaru is Armor-Damage,
-    retract(armorpoint(_)),
-    asserta(armorpoint(ArmorBaru)),
+    retract(armor(_)),
+    asserta(armor(ArmorBaru)),
     (
-        (ArmorBaru =:= 0,retract(armor(_)),asserta(armor(none)),
+        (ArmorBaru =:= 0,retract(armor(_)),asserta(armor(0)),
             write('Armormu hancur melindungimu'),nl);
         (ArmorBaru > 0,write('Armormu melindungimu, sisa armormu : '),write(ArmorBaru),nl)
     ),!.
 serangPlayer(Damage) :- 
     healthpoint(Darah),
-    armorpoint(Armor),
+    armor(Armor),
     Armor > 0, Armor =< Damage,
-    retract(armor(_)),asserta(armor(none)),
+    retract(armor(_)),asserta(armor(0)),
     write('Armormu hancur melindungimu'),nl,
     DarahBaru is Darah+Armor-Damage,
     retract(healthpoint(_)),asserta(healthpoint(DarahBaru)),
@@ -173,10 +172,18 @@ serangPlayer(Damage) :-
     ),!. 
 
 serangMusuh([]) :- !.
+serangMusuh(_) :-
+    senjata(_,_,BanyakAm),
+    BanyakAm =:= 0,
+    write('Ammo-mu tidak cukup untuk menyerang musuh'),nl,!.
 serangMusuh([Id|Tail]) :- 
     musuh(Id,_,_,_,DarahM,SenjataMusuh),
-    senjata(Senjata),
-    isSenjata(Senjata,Damage),isSenjata(SenjataMusuh,DamageMusuh),
+    senjata(Senjata,Damage,BanyakAm),
+    BanyakAm > 0,
+        BanyakAmBaru is BanyakAm-1,
+        retract(senjata(Senjata,Damage,BanyakAm)),
+        asserta(senjata(Senjata,Damage,BanyakAmBaru)),
+    isSenjata(SenjataMusuh,DamageMusuh),
     DarahM > Damage,
     DarahMBaru is DarahM-Damage,
     retract(musuh(Id,Xm,Ym,DamM,_,SenjataMusuh)),
@@ -187,10 +194,18 @@ serangMusuh([Id|Tail]) :-
     serangMusuh(Tail),!.
 serangMusuh([Id|Tail]) :-
     musuh(Id,_,_,_,DarahM,SenjataMusuh),
-    senjata(Senjata),
-    isSenjata(Senjata,Damage),isSenjata(SenjataMusuh,_),
+    senjata(Senjata,Damage,BanyakAm),
+    BanyakAm > 0,
+        BanyakAmBaru is BanyakAm-1,
+        retract(senjata(Senjata,Damage,BanyakAm)),
+        asserta(senjata(Senjata,Damage,BanyakAmBaru)),
+    isSenjata(SenjataMusuh,_),
     DarahM =< Damage,write('Anda menyerang musuh sebesar '),write(Damage),nl,
     write('Musuh mati.'),nl,
     retract(musuh(Id,Xm,Ym,_,_,_)),
-    asserta(barang(SenjataMusuh,Xm,Ym)),
+    between(1,100,IdB),\+barang(IdB,_,_,_,_),
+    isSenjata(SenjataMusuh,DA),
+    Per2 is (DA div 2),
+    random(Per2,DA,DropAmmo),
+    asserta(barang(Id,SenjataMusuh,Xm,Ym,DropAmmo)),
     serangMusuh(Tail),!.

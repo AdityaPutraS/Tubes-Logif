@@ -1,5 +1,7 @@
+:- dynamic(barang/5). /* barang(Id,Nama,X,Y,Atribut) */
+
 /* isSenjata(Nama,Damage). */
-isSenjata(ak47,90).
+isSenjata(ak47,10).
 isSenjata(glock,5).
 isSenjata(sniper_rifle,15).
 isSenjata(mp5,12).
@@ -17,18 +19,10 @@ isMedicine(salonpas,15).
 isMedicine(perban,30).
 /*-----------------------------*/
 
-/* isAmmo(Nama,BanyakPeluru). */
-isAmmo(ak47_ammo,100).
-isAmmo(glock_ammo,100).
-isAmmo(sniper_rifle_ammo,100).
-isAmmo(mp5_ammo,100).
+/* isAmmo(Nama,BanyakPeluru,SenjataYangSesuai). */
+isAmmo(ak47_ammo,100,ak47).
+isAmmo(glock_ammo,100,glock).
+isAmmo(sniper_rifle_ammo,100,sniper_rifle).
+isAmmo(mp5_ammo,100,mp5).
 /*-----------------------------*/
 
-/* barang(Id,Nama,X,Y). */
-:- dynamic(barang/3).
-init_barang :-
-    asserta(barang(chainmail,2,3)),
-    asserta(barang(ak47_ammo,2,3)),
-    asserta(barang(ak47,8,2)),
-    asserta(barang(betadine,3,9)),
-    asserta(barang(tshirt,1,1)).

@@ -6,6 +6,7 @@
 :- dynamic(tinggiPeta/1).
 :- dynamic(peta/1).
 :- dynamic(petaBackup/1).
+:- dynamic(tick/1).
 
 init_map :-
     baca_file('peta.txt',P),
@@ -13,6 +14,7 @@ init_map :-
     asserta(peta(PBaru)),
     asserta(petaBackup(PBaru)),
     asserta(deadzone(0)),
+    asserta(tick(0)),
     asserta(lebarPeta(26)),asserta(tinggiPeta(10)),!.
 
 reset_map :-
@@ -57,13 +59,13 @@ gambarPlayer :-
 printPrio(X,Y) :-
 	musuh(_,X,Y,_,_,_),!, write('E').
 printPrio(X,Y) :-
-	isMedicine(Nama,_), barang(Nama,X,Y), !, write('O').
+	isMedicine(Nama,_), barang(_,Nama,X,Y,_), !, write('O').
 printPrio(X,Y) :-
-	isSenjata(Nama,_), barang(Nama,X,Y), !, write('S').
+	isSenjata(Nama,_), barang(_,Nama,X,Y,_), !, write('S').
 printPrio(X,Y) :-
-	isArmor(Nama,_), barang(Nama,X,Y), !, write('A').
+	isArmor(Nama,_), barang(_,Nama,X,Y,_), !, write('A').
 printPrio(X,Y) :-
-	isAmmo(Nama,_), barang(Nama,X,Y), !, write('M').
+	isAmmo(Nama,_,_), barang(_,Nama,X,Y,_), !, write('M').
 printPrio(X,Y) :-
 	player(X,Y), !, write('P').
 printPrio(_,_) :-
