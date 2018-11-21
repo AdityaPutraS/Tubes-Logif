@@ -1,5 +1,5 @@
 /* isSenjata(Nama,Damage). */
-isSenjata(ak47,10).
+isSenjata(ak47,90).
 isSenjata(glock,5).
 isSenjata(sniper_rifle,15).
 isSenjata(mp5,12).
@@ -25,10 +25,10 @@ isAmmo(mp5_ammo,100).
 /*-----------------------------*/
 
 /* barang(Id,Nama,X,Y). */
-:- dynamic(barang/4).
+:- dynamic(barang/3).
 init_barang :-
-    asserta(barang(1,chainmail,2,3)),
-    asserta(barang(2,ak47_ammo,2,3)),
-    asserta(barang(3,ak47,8,2)),
-    asserta(barang(4,betadine,3,9)),
-    asserta(barang(5,tshirt,1,1)).
+    asserta(barang(chainmail,2,3)),
+    asserta(barang(ak47_ammo,2,3)),
+    asserta(barang(ak47,8,2)),
+    asserta(barang(betadine,3,9)),
+    asserta(barang(tshirt,1,1)).

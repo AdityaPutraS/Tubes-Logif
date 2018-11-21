@@ -21,13 +21,12 @@ initMusuh(Banyak) :-
 
 updateMusuh :-
     findall(M, musuh(M,_,_,_,_,_), ListId),
-    updatePosisiMusuh(ListId),
-    updateAksiMusuh(ListId),!.
+    updatePosisiMusuh(ListId),!.
 
 updatePosisiMusuh([]) :- !.
 updatePosisiMusuh([Id|Tail]) :-
-    random(1,100,MovAcak),
-    tentukanAksi(Id,MovAcak),
+    random(1,100,Acak),
+    tentukanAksi(Id,Acak),
     updatePosisiMusuh(Tail),!.
 
 tentukanAksi(_,Mov) :-
@@ -139,25 +138,59 @@ sMusuh(Id) :-
 sMusuh(Id) :-
     nMusuh(Id),!.
 
-updateAksiMusuh([]) :- !.
-updateAksiMusuh([Id|Tail]) :-
-    musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
-    player(Xp,Yp),
-    Xm =:= Xp, Ym =:= Yp,
-    serangPlayer(Damage),
-    updateAksiMusuh(Tail),!.
-updateAksiMusuh([_|Tail]) :-
-    updateAksiMusuh(Tail),!.
-
+serangPlayer(Damage) :-
+    armorpoint(Armor),
+    Armor > 0,Armor >= Damage,
+    ArmorBaru is Armor-Damage,
+    retract(armorpoint(_)),
+    asserta(armorpoint(ArmorBaru)),
+    (
+        (ArmorBaru =:= 0,retract(armor(_)),asserta(armor(none)),
+            write('Armormu hancur melindungimu'),nl);
+        (ArmorBaru > 0,write('Armormu melindungimu, sisa armormu : '),write(ArmorBaru),nl)
+    ),!.
 serangPlayer(Damage) :- 
     healthpoint(Darah),
-    Darah > Damage,
-    DarahBaru is Darah-Damage,
-    retract(healthpoint(_)),
-    asserta(healthpoint(DarahBaru)),
-    write('Kamu baru saja diserang oleh musuh.'),nl,
-    write('Sisa darahmu : '),write(DarahBaru),nl,!.
+    armorpoint(Armor),
+    Armor > 0, Armor =< Damage,
+    retract(armor(_)),asserta(armor(none)),
+    write('Armormu hancur melindungimu'),nl,
+    DarahBaru is Darah+Armor-Damage,
+    retract(healthpoint(_)),asserta(healthpoint(DarahBaru)),
+    write('Kamu baru saja diserang musuh, sisa darahmu : '),write(DarahBaru),nl,!.
 serangPlayer(Damage) :-
     healthpoint(Darah),
-    Darah =< Damage,
-    kalah, !. 
+    (
+        (   Darah > Damage, 
+            DarahBaru is Darah-Damage,
+            retract(healthpoint(_)),asserta(healthpoint(DarahBaru)),
+            write('Kamu baru saja diserang musuh, sisa darahmu : '),write(DarahBaru),nl
+        );
+        (   Darah =< Damage,
+            write('Darahmu habis terkena serangan musuh, kamu mati'),nl,
+            kalah   
+        )
+    ),!. 
+
+serangMusuh([]) :- !.
+serangMusuh([Id|Tail]) :- 
+    musuh(Id,_,_,_,DarahM,SenjataMusuh),
+    senjata(Senjata),
+    isSenjata(Senjata,Damage),isSenjata(SenjataMusuh,DamageMusuh),
+    DarahM > Damage,
+    DarahMBaru is DarahM-Damage,
+    retract(musuh(Id,Xm,Ym,DamM,_,SenjataMusuh)),
+    asserta(musuh(Id,Xm,Ym,DamM,DarahMBaru,SenjataMusuh)),
+    write('Anda menyerang musuh sebesar '),write(Damage),
+    write(' damage'),nl,
+    serangPlayer(DamageMusuh),
+    serangMusuh(Tail),!.
+serangMusuh([Id|Tail]) :-
+    musuh(Id,_,_,_,DarahM,SenjataMusuh),
+    senjata(Senjata),
+    isSenjata(Senjata,Damage),isSenjata(SenjataMusuh,_),
+    DarahM =< Damage,write('Anda menyerang musuh sebesar '),write(Damage),nl,
+    write('Musuh mati.'),nl,
+    retract(musuh(Id,Xm,Ym,_,_,_)),
+    asserta(barang(SenjataMusuh,Xm,Ym)),
+    serangMusuh(Tail),!.

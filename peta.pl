@@ -53,14 +53,22 @@ gambarDeadzone(DZ) :-
 gambarPlayer :-
     player(X,Y),
     setPixel(X,Y,'P'),!.
-gambarObjek([]) :- !.
-gambarObjek([Id|Tail]) :-
-    barang(Id,Nama,X,Y),
-    (isSenjata(Nama,_),setPixel(X,Y,'S');
-     isArmor(Nama,_),setPixel(X,Y,'A');
-     isMedicine(Nama,_),setPixel(X,Y,'O');
-     isAmmo(Nama,_),setPixel(X,Y,'M')),
-    gambarObjek(Tail), !.
+
+printPrio(X,Y) :-
+	musuh(_,X,Y,_,_,_),!, write('E').
+printPrio(X,Y) :-
+	isMedicine(Nama,_), barang(Nama,X,Y), !, write('O').
+printPrio(X,Y) :-
+	isSenjata(Nama,_), barang(Nama,X,Y), !, write('S').
+printPrio(X,Y) :-
+	isArmor(Nama,_), barang(Nama,X,Y), !, write('A').
+printPrio(X,Y) :-
+	isAmmo(Nama,_), barang(Nama,X,Y), !, write('M').
+printPrio(X,Y) :-
+	player(X,Y), !, write('P').
+printPrio(_,_) :-
+	write('-').
+
 gambarMusuh([]) :- !.
 gambarMusuh([Id|Tail]) :-
     musuh(Id,X,Y,_,_,_),
@@ -70,11 +78,9 @@ gambarMusuh([Id|Tail]) :-
 updatePeta :-
     reset_map,
     findall(M, musuh(M,_,_,_,_,_), ListIdMusuh),
-    findall(B, barang(B,_,_,_), ListIdBarang),
     deadzone(DZ),
     gambarDeadzone(DZ),
     gambarPlayer,
-    gambarObjek(ListIdBarang),
     gambarMusuh(ListIdMusuh),!.
 
 /* terrain(Tipe,XAtasKiri,YAtasKiri,XBawahKanan,YBawahKanan) */

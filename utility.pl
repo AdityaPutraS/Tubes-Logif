@@ -1,4 +1,8 @@
 /* LIST */
+
+/* kosong(List) */
+kosong([]).
+
 /* cari(List,CharDicari,Indexnya) */
 cari([],_,-1) :- !.
 cari([C|_],C,0) :- !.
@@ -48,5 +52,11 @@ splitList(L,C,[Temp|Hasil]) :-
 splitList(L,C,[L]) :- 
 	cari(L,C,Idx),
 	Idx =:= -1, !.
+
+listToStr([],'') :- !.
+listToStr([C|Tail],S) :-
+	listToStr(Tail,S2),
+	atom_concat(C, S2, S),!.
+	
 
 

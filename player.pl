@@ -12,7 +12,7 @@ init_player :-
 	asserta(healthpoint(100)),
 	asserta(armorpoint(0)),
 	asserta(inventory([])),
-	asserta(senjata(none)),
+	asserta(senjata(ak47)),
 	asserta(armor(none)).
 
 kalah :- 

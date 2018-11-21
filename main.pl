@@ -78,27 +78,37 @@ look :-
 	)),
 	!.
 
-printPrio(X,Y) :-
-	musuh(_,X,Y,_,_,_),!, write('E').
-printPrio(X,Y) :-
-	isMedicine(Nama,_), barang(_,Nama,X,Y), !, write('O').
-printPrio(X,Y) :-
-	isSenjata(Nama,_), barang(_,Nama,X,Y), !, write('S').
-printPrio(X,Y) :-
-	isArmor(Nama,_), barang(_,Nama,X,Y), !, write('A').
-printPrio(X,Y) :-
-	isAmmo(Nama,_), barang(_,Nama,X,Y), !, write('M').
-printPrio(X,Y) :-
-	player(X,Y), !, write('P').
-printPrio(X,Y) :-
-	write('-').
-
 map :-
 	gameMain(GM), GM =:= 1,
 	peta(X), printList2D(X),!.
 
-getObjek(X,Y,'Musuh') :- !.
-	/*musuh(Id,XPos,YPos,Damage,Health,ItemDrop),!.*/
+status :-
+	gameMain(GM), GM =:= 1,
+	write('Health        : '),healthpoint(Darah),write(Darah),nl,
+	write('Armor         : '),armorpoint(ArmorP),write(ArmorP),nl,
+	write('Senjata Equip : '),senjata(Sen),write(Sen),nl,
+	write('Armor Equip   : '),armor(Armor),write(Armor),nl,
+	!.
+
+attack :-
+	gameMain(GM), GM =:= 1,
+	\+senjata(none),
+	player(X,Y),
+	findall(M,musuh(M,X,Y,_,_,_),ListId),
+	\+kosong(ListId),
+	length(ListId,BanyakM),
+	write('Ada '),write(BanyakM),write(' musuh di petak ini'),nl,
+	serangMusuh(ListId),update,!.
+attack :-
+	gameMain(GM), GM =:= 1,
+	player(X,Y),
+	findall(M,musuh(M,X,Y,_,_,_),ListId),
+	kosong(ListId),
+	write('Ga ada musuh buat diserang cok!'),nl,update,!.
+attack :-
+	gameMain(GM), GM =:= 1,
+	senjata(none),
+	write('Butuh senjata untuk menyerang musuh kawanku'),nl,update,!.
 /* Movement */
 n :-
 	gameMain(GM), GM =:= 1,
