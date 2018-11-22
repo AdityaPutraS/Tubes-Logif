@@ -88,6 +88,8 @@ printPrio(X,Y) :-
 printPrio(X,Y) :-
 	player(X,Y), !, write('P').
 printPrio(X,Y) :-
+	isDeadzone(X,Y), !, write('X').
+printPrio(X,Y) :-
 	write('-').
 
 map :-
