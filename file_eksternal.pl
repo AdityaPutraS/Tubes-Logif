@@ -24,3 +24,4 @@ write_list(NamaFile,L) :-
 	writeData(S,L),
 	close(S).
 /*-----------------------------*/
+

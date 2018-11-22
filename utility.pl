@@ -1,4 +1,8 @@
 /* LIST */
+
+/* kosong(List) */
+kosong([]).
+
 /* cari(List,CharDicari,Indexnya) */
 cari([],_,-1) :- !.
 cari([C|_],C,0) :- !.
@@ -49,4 +53,21 @@ splitList(L,C,[L]) :-
 	cari(L,C,Idx),
 	Idx =:= -1, !.
 
+listToStr([],'') :- !.
+listToStr([C|Tail],S) :-
+	listToStr(Tail,S2),
+	atom_concat(C, S2, S),!.
+	
+/* appendList(L,X,LHasil) */
+appendList(L,X,[X|L]).
 
+/* concatList(L1,L2,L3) */
+concatList([],L,L) :- !.
+concatList([Head|Tail],L,Hasil) :-
+	concatList(Tail,L,Temp),
+	appendList(Temp,Head,Hasil),!.
+
+/* PAIR */
+make_pair(First,Second,[First,Second]).
+first([First|_],First).
+second([_,Second],Second).

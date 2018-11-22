@@ -11,7 +11,23 @@
 /*-----------------------------*/
 /* Command Biasa */
 update :-
+	sudahMenang(Menang),Menang == false,
+	(
+		(tick(T), T mod 10 =:= 0,random(1,3,Banyak),
+			generateBarang(Banyak),
+			write('Supply drop sudah datang, '),write('ada '),write(Banyak),
+			write(' barang di peta jatuh secara acak, cari ya'),nl
+		);
+		(tick(T), \+(T mod 10 =:= 0))
+	),
+	retract(tick(T)),
+	TBaru is T+1,
+	asserta(tick(TBaru)),
 	updateMusuh, updatePeta, !.
+update :-
+	sudahMenang(Menang),Menang == true,
+	write('Selamat, kamu menang'),nl,
+	quit,!.
 
 start :-
 	write('PUBG.'),nl,
@@ -28,7 +44,7 @@ start :-
   write('  \\___/  \\_/\\_/  \\___/ '),nl,
 	init_player,
 	init_map,
-	init_barang,
+	generateBarang(5),
 	initMusuh(10),
 	updatePeta,!.
 
@@ -62,6 +78,7 @@ quit :-
 	write('ArigaThanks :3'),!.
 
 look :-
+	gameMain(GM), GM =:= 1,
 	player(X,Y),
 	XMin is X-1,
 	XMax is X+1,
@@ -93,16 +110,121 @@ printPrio(X,Y) :-
 	write('-').
 
 map :-
+	gameMain(GM), GM =:= 1,
 	peta(X), printList2D(X),!.
 
-getObjek(X,Y,'Musuh') :- !.
-	/*musuh(Id,XPos,YPos,Damage,Health,ItemDrop),!.*/
+status :-
+	gameMain(GM), GM =:= 1,
+	write('Health           : '),healthpoint(Darah),write(Darah),nl,
+	write('Armor            : '),armor(ArmorP),write(ArmorP),nl,
+	write('Tipe Senjata     : '),senjata(Sen,Dam,Ammo),write(Sen),nl,
+	write('Damage Senjata   : '),write(Dam),nl,
+	write('Banyak Ammo      : '),write(Ammo),write(' peluru'),nl,
+	write('Inventory        : '),nl,
+	inventory(_,_)->
+	forall(inventory(Obj,Atribut),
+		(
+			write('  -'),write(Obj),write(' : '),write(Atribut),
+			(
+				(isAmmo(Obj,_,_),write(' peluru'));
+				(isSenjata(Obj,_),write(' peluru'));
+				(isArmor(Obj,_),write(' defense'));
+				(isMedicine(Obj,_),write(' HP'))
+			),nl
+		)
+	);(
+		write(' Inventory kosong'),nl	
+	),
+	!.
+
+attack :-
+	gameMain(GM), GM =:= 1,
+	\+senjata(none,_,_),
+	player(X,Y),
+	findall(M,musuh(M,X,Y,_,_,_),ListId),
+	\+kosong(ListId),
+	length(ListId,BanyakM),
+	write('Ada '),write(BanyakM),write(' musuh di petak ini'),nl,
+	serangMusuh(ListId),update,!.
+attack :-
+	gameMain(GM), GM =:= 1,
+	player(X,Y),
+	findall(M,musuh(M,X,Y,_,_,_),ListId),
+	kosong(ListId),
+	write('Ga ada musuh buat diserang cok!'),nl,update,!.
+attack :-
+	gameMain(GM), GM =:= 1,
+	senjata(none,_,_),
+	write('Butuh senjata untuk menyerang musuh kawanku'),nl,update,!.
+/* Inventory */
+take(_) :-
+	player(X,Y),
+	\+barang(_,_,X,Y,_),
+	write('Barang yang kamu cari tidak ditemukan'),
+	update, !.
+take(Object) :-
+	player(X,Y),
+	barang(Id,Object,X,Y,D),
+	!,
+	addToInventory(Object,D)->
+	(
+		retract(barang(Id,Object,X,Y,D)),write('Kamu mengambil 1 '),write(Object),
+		write(' dan menaruhnya di inventory'),nl
+	);(
+		write('Gagal menambahkan karena inventory penuh'),nl
+	),
+	update, !.
+
+
+drop(Object) :-
+	findall(Atribut,inventory(Object,Atribut),ListObj),
+	length(ListObj,Panjang),
+	Panjang > 1 ->
+	(
+		/* Ada banyak, kasih pengguna milih */
+		write('Nampaknya ada banyak item yang bernama '),write(Object),write(' di inventorimu'),nl,
+		write('Pilih diantara item berikut yang mau kamu drop'),nl,
+		forall(between(1,Panjang,I),(
+			Idx is I-1,
+			write('   '),write(I),write('. '),write(Object),write(' , Atribut : '),
+			ambil(ListObj,Idx,C),write(C),nl
+		)),
+		write('Masukan kode item yang ingin kamu drop (akhiri dengan . ) : '),
+		read(Kode),between(1,Panjang,Kode)->
+		(
+			IdxItem is Kode-1,ambil(ListObj,IdxItem,Atrib),
+			delFromInventory(Object,Atrib)->
+			between(1,100,Id),\+barang(Id,_,_,_,_),
+			player(X,Y),
+			asserta(barang(Id,Object,X,Y,Atrib)),
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
+		);(
+			write('Kode tidak valid'),fail,!
+		)
+	);(
+		/* Ada 1 aja atau ngga ada */
+		inventory(Object,Atribut),
+		delFromInventory(Object,Atribut)->
+		(
+			between(1,100,Id),\+barang(Id,_,_,_,_),
+			player(X,Y),
+			asserta(barang(Id,Object,X,Y,Atribut)),
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
+		);(
+			write(Object),write(' harus ada di inventory agar bisa dijatuhkan'),nl
+		)
+	),
+	update,!. 
+
+
 /* Movement */
 n :-
+	gameMain(GM), GM =:= 1,
 	player(_,Y),
 	Y =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
 n :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	Y > 1,
 	setPixel(X,Y,'-'),
@@ -110,11 +232,13 @@ n :-
 	setPixel(X,YBaru,'P'),
 	asserta(player(X,YBaru)),update,!.
 e  :-
+	gameMain(GM), GM =:= 1,
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
 	write('Gabisa Cok!'),nl,update,!.
 e :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	write([X,Y]),nl,
 	lebarPeta(Le),
@@ -124,10 +248,12 @@ e :-
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),update,!.
 w :-
+	gameMain(GM), GM =:= 1,
 	player(X,_),
 	X =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
 w :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	write([X,Y]),nl,
 	X > 1,
@@ -136,11 +262,13 @@ w :-
 	setPixel(XBaru,Y,'P'),
 	asserta(player(XBaru,Y)),update,!.
 s :-
+	gameMain(GM), GM =:= 1,
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,
 	write('Gabisa Cok!'),nl,update,!.
 s :-
+	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	write([X,Y]),nl,
 	tinggiPeta(Ti),
@@ -150,3 +278,31 @@ s :-
 	setPixel(X,YBaru,'P'),
 	asserta(player(X,YBaru)),update,!.
 /*-----------------------------*/
+
+sudahMenang(true) :-
+	findall(M,musuh(M,_,_,_,_,_),ListId),
+	length(ListId,0),!.
+sudahMenang(false).
+
+generateBarang(0) :- !.
+generateBarang(Banyak) :-
+    (between(1,100,Id),\+barang(Id,_,_,_,_)),
+    findall(S,isSenjata(S,_),ListSenjata),
+    findall(A,isArmor(A,_),ListArmor),
+    findall(O,isMedicine(O,_),ListMedicine),
+    findall(M,isAmmo(M,_,_),ListAmmo),
+    concatList(ListSenjata,ListArmor,L),
+    concatList(L,ListMedicine,L2),
+    concatList(L2,ListAmmo,L3),
+    length(L3,Panjang),
+    random(1,Panjang,X),
+    ambil(L3,X,Barang),
+    lebarPeta(Le),tinggiPeta(Ti),
+	random(1,Le,XPos),random(1,Ti,YPos),
+	(
+		/* TODO : Randomize D */
+		(isSenjata(Barang,D);isArmor(Barang,D);isAmmo(Barang,D,_);isMedicine(Barang,D)),
+		asserta(barang(Id,Barang,XPos,YPos,D))
+	),
+    BanyakBaru is Banyak-1,
+    generateBarang(BanyakBaru),!.
