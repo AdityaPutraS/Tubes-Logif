@@ -84,6 +84,8 @@ printPrio(X,Y) :-
 	isAmmo(Nama,_,_), barang(_,Nama,X,Y,_), !, write('M').
 printPrio(X,Y) :-
 	player(X,Y), !, write('P').
+printPrio(X,Y) :-
+	isDeadzone(X,Y), !, write('X').
 printPrio(_,_) :-
 	write('-').
 

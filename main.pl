@@ -66,17 +66,6 @@ help :-
 	write('13. save : Menyimpan permainan pemain.'),nl,
 	write('14. load : Membuka save-an pemain.'),nl,!.
 
-quit :-
-	retract(player(_,_)),
-	retract(healthpoint(_)),
-	retract(armorpoint(_)),
-	retract(inventory(_)),
-	retract(senjata(_)),
-	retract(armor(_)),
-	retract(peta(_)),
-	write('Game selesai.'),nl,
-	write('ArigaThanks :3'),!.
-
 look :-
 	gameMain(GM), GM =:= 1,
 	player(X,Y),
@@ -91,23 +80,6 @@ look :-
 		nl
 	)),
 	!.
-
-printPrio(X,Y) :-
-	musuh(_,X,Y,_,_,_),!, write('E').
-printPrio(X,Y) :-
-	isMedicine(Nama,_), barang(_,Nama,X,Y), !, write('O').
-printPrio(X,Y) :-
-	isSenjata(Nama,_), barang(_,Nama,X,Y), !, write('S').
-printPrio(X,Y) :-
-	isArmor(Nama,_), barang(_,Nama,X,Y), !, write('A').
-printPrio(X,Y) :-
-	isAmmo(Nama,_), barang(_,Nama,X,Y), !, write('M').
-printPrio(X,Y) :-
-	player(X,Y), !, write('P').
-printPrio(X,Y) :-
-	isDeadzone(X,Y), !, write('X').
-printPrio(X,Y) :-
-	write('-').
 
 map :-
 	gameMain(GM), GM =:= 1,
@@ -216,6 +188,47 @@ drop(Object) :-
 	),
 	update,!. 
 
+/*
+use(Object) :-
+	findall(Atribut,inventory(Object,Atribut),ListObj),
+	length(ListObj,Panjang),
+	Panjang > 1 ->
+	(
+		/* Ada banyak, kasih pengguna milih 
+		write('Nampaknya ada banyak item yang bernama '),write(Object),write(' di inventorimu'),nl,
+		write('Pilih diantara item berikut yang mau kamu drop'),nl,
+		forall(between(1,Panjang,I),(
+			Idx is I-1,
+			write('   '),write(I),write('. '),write(Object),write(' , Atribut : '),
+			ambil(ListObj,Idx,C),write(C),nl
+		)),
+		write('Masukan kode item yang ingin kamu drop (akhiri dengan . ) : '),
+		read(Kode),between(1,Panjang,Kode)->
+		(
+			IdxItem is Kode-1,ambil(ListObj,IdxItem,Atrib),
+			delFromInventory(Object,Atrib)->
+			between(1,100,Id),\+barang(Id,_,_,_,_),
+			player(X,Y),
+			asserta(barang(Id,Object,X,Y,Atrib)),
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
+		);(
+			write('Kode tidak valid'),fail,!
+		)
+	);(
+		/* Ada 1 aja atau ngga ada 
+		inventory(Object,Atribut),
+		delFromInventory(Object,Atribut)->
+		(
+			between(1,100,Id),\+barang(Id,_,_,_,_),
+			player(X,Y),
+			asserta(barang(Id,Object,X,Y,Atribut)),
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
+		);(
+			write(Object),write(' harus ada di inventory agar bisa dijatuhkan'),nl
+		)
+	),
+	update,!. 
+*/
 
 /* Movement */
 n :-
