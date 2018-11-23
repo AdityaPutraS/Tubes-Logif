@@ -30,6 +30,9 @@ update :-
 	quit,!.
 
 start :-
+	gameMain(_),
+	write('Kamu tidak bisa memulai game ketika game sudah dimulai.'), nl, !.
+start :-
 	write('PUBG.'),nl,
 	write(' _____    _    _   ____     _____ '),nl,
 	write('|  __ \\  | |  | | |  _ \\   / ____|'),nl,
@@ -41,7 +44,7 @@ start :-
 	write('  _   _          _   _ '),nl,
 	write(' | | | |__ __ __| | | |'),nl,
  	write(' | |_| |\\ V  V /| |_| |'),nl,
-  write('  \\___/  \\_/\\_/  \\___/ '),nl,
+  	write('  \\___/  \\_/\\_/  \\___/ '),nl,
 	init_player,
 	init_map,
 	generateBarang(5),
@@ -63,11 +66,15 @@ help :-
 	write('11. use(object) : Menggunakan sebuah object yang dalam inventori.'),nl,
 	write('12. attack : Menyerang enemy dalam petak sama.'),nl,
 	write('13. status : Melihat status diri.'),nl,
-	write('13. save : Menyimpan permainan pemain.'),nl,
-	write('14. load : Membuka save-an pemain.'),nl,!.
+	write('14. save : Menyimpan permainan pemain.'),nl,
+	write('15. load : Membuka save-an pemain.'),nl,
+	write('16. help : Menampilkan ini lagi.'),nl,!.
 
 look :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+look :-
 	player(X,Y),
 	XMin is X-1,
 	XMax is X+1,
@@ -81,36 +88,47 @@ look :-
 	)),
 	!.
 
+
 map :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+map :-
 	peta(X), printList2D(X),!.
 
+
 status :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+status :-
 	write('Health           : '),healthpoint(Darah),write(Darah),nl,
 	write('Armor            : '),armor(ArmorP),write(ArmorP),nl,
 	write('Tipe Senjata     : '),senjata(Sen,Dam,Ammo),write(Sen),nl,
 	write('Damage Senjata   : '),write(Dam),nl,
 	write('Banyak Ammo      : '),write(Ammo),write(' peluru'),nl,
 	write('Inventory        : '),nl,
-	inventory(_,_)->
-	forall(inventory(Obj,Atribut),
+	inventory(_,_)->(
+		forall(inventory(Obj,Atribut),
 		(
 			write('  -'),write(Obj),write(' : '),write(Atribut),
 			(
 				(isAmmo(Obj,_,_),write(' peluru'));
-				(isSenjata(Obj,_),write(' peluru'));
+				(isSenjata(Obj,_),write(' damage'));
 				(isArmor(Obj,_),write(' defense'));
 				(isMedicine(Obj,_),write(' HP'))
 			),nl
-		)
+		))
 	);(
 		write(' Inventory kosong'),nl	
 	),
 	!.
 
 attack :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+attack :-
 	\+senjata(none,_,_),
 	player(X,Y),
 	findall(M,musuh(M,X,Y,_,_,_),ListId),
@@ -119,20 +137,22 @@ attack :-
 	write('Ada '),write(BanyakM),write(' musuh di petak ini'),nl,
 	serangMusuh(ListId),update,!.
 attack :-
-	gameMain(GM), GM =:= 1,
 	player(X,Y),
 	findall(M,musuh(M,X,Y,_,_,_),ListId),
 	kosong(ListId),
 	write('Ga ada musuh buat diserang cok!'),nl,update,!.
 attack :-
-	gameMain(GM), GM =:= 1,
 	senjata(none,_,_),
 	write('Butuh senjata untuk menyerang musuh kawanku'),nl,update,!.
 /* Inventory */
 take(_) :-
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+take(Object) :-
 	player(X,Y),
-	\+barang(_,_,X,Y,_),
-	write('Barang yang kamu cari tidak ditemukan'),
+	\+barang(_,Object,X,Y,_), !,
+	write('Barang yang kamu cari tidak ditemukan'), nl,
 	update, !.
 take(Object) :-
 	player(X,Y),
@@ -147,7 +167,10 @@ take(Object) :-
 	),
 	update, !.
 
-
+drop(_) :-
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
 drop(Object) :-
 	findall(Atribut,inventory(Object,Atribut),ListObj),
 	length(ListObj,Panjang),
@@ -188,107 +211,122 @@ drop(Object) :-
 	),
 	update,!. 
 
-/*
+use(_) :-
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
 use(Object) :-
 	findall(Atribut,inventory(Object,Atribut),ListObj),
 	length(ListObj,Panjang),
 	Panjang > 1 ->
 	(
-		/* Ada banyak, kasih pengguna milih 
+		/* Ada banyak, kasih pengguna milih */
 		write('Nampaknya ada banyak item yang bernama '),write(Object),write(' di inventorimu'),nl,
-		write('Pilih diantara item berikut yang mau kamu drop'),nl,
+		write('Pilih diantara item berikut yang mau kamu use'),nl,
 		forall(between(1,Panjang,I),(
 			Idx is I-1,
 			write('   '),write(I),write('. '),write(Object),write(' , Atribut : '),
 			ambil(ListObj,Idx,C),write(C),nl
 		)),
-		write('Masukan kode item yang ingin kamu drop (akhiri dengan . ) : '),
-		read(Kode),between(1,Panjang,Kode)->
-		(
+		write('Masukan kode item yang ingin kamu use (akhiri dengan . ) : '),
+		read(Kode),between(1,Panjang,Kode)->(
 			IdxItem is Kode-1,ambil(ListObj,IdxItem,Atrib),
-			delFromInventory(Object,Atrib)->
-			between(1,100,Id),\+barang(Id,_,_,_,_),
-			player(X,Y),
-			asserta(barang(Id,Object,X,Y,Atrib)),
-			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
-		);(
+			(
+				(isAmmo(Object,_,_),useAmmo(Object,Atrib));
+				(isSenjata(Object,_),equipSenjata(Object,Atrib));
+				(isArmor(Object,_),equipArmor(Object,Atrib));
+				(isMedicine(Object,_),useMedicine(Object,Atrib))
+			)
+		);
+		(
 			write('Kode tidak valid'),fail,!
 		)
-	);(
-		/* Ada 1 aja atau ngga ada 
-		inventory(Object,Atribut),
-		delFromInventory(Object,Atribut)->
+	);
+	(
+		/* Ada 1 aja atau ngga ada */
+		inventory(Object,Atribut)->(
+			(isAmmo(Object,_,_),useAmmo(Object,Atribut));
+			(isSenjata(Object,_),equipSenjata(Object,Atribut));
+			(isArmor(Object,_),equipArmor(Object,Atribut));
+			(isMedicine(Object,_),useMedicine(Object,Atribut))
+		);
 		(
-			between(1,100,Id),\+barang(Id,_,_,_,_),
-			player(X,Y),
-			asserta(barang(Id,Object,X,Y,Atribut)),
-			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
-		);(
-			write(Object),write(' harus ada di inventory agar bisa dijatuhkan'),nl
+			write('Kamu tidak memiliki '),write(Object),write('.'),nl,
+			write('Mungkin kamu bisa use sesuatu yang memang kamu miliki.'), nl,
+			write('Seperti mungkin, ensephalon yang ada pada kepalamu itu.'), nl
 		)
 	),
-	update,!. 
-*/
+	update,!.
+
 
 /* Movement */
 n :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+n :-
 	player(_,Y),
 	Y =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
 n :-
-	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
 	Y > 1,
 	setPixel(X,Y,'-'),
 	YBaru is Y-1,
 	setPixel(X,YBaru,'P'),
+	write([X,YBaru]),nl,
 	asserta(player(X,YBaru)),update,!.
+e :-
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
 e  :-
-	gameMain(GM), GM =:= 1,
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
 	write('Gabisa Cok!'),nl,update,!.
 e :-
-	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
-	write([X,Y]),nl,
 	lebarPeta(Le),
 	X < Le,
 	setPixel(X,Y,'-'),
 	XBaru is X+1,
 	setPixel(XBaru,Y,'P'),
+	write([XBaru,Y]),nl,
 	asserta(player(XBaru,Y)),update,!.
 w :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+w :-
 	player(X,_),
 	X =:= 1,
 	write('Gabisa Cok!'),nl,update,!.
 w :-
-	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
-	write([X,Y]),nl,
 	X > 1,
 	setPixel(X,Y,'-'),
 	XBaru is X-1,
 	setPixel(XBaru,Y,'P'),
+	write([XBaru,Y]),nl,
 	asserta(player(XBaru,Y)),update,!.
 s :-
-	gameMain(GM), GM =:= 1,
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+s :-
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,
 	write('Gabisa Cok!'),nl,update,!.
 s :-
-	gameMain(GM), GM =:= 1,
 	retract(player(X,Y)),
-	write([X,Y]),nl,
 	tinggiPeta(Ti),
 	Y < Ti,
 	setPixel(X,Y,'-'),
 	YBaru is Y+1,
 	setPixel(X,YBaru,'P'),
+	write([X,YBaru]),nl,
 	asserta(player(X,YBaru)),update,!.
 /*-----------------------------*/
 
