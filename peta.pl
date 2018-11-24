@@ -4,40 +4,33 @@
 :- dynamic(deadzone/1).
 :- dynamic(lebarPeta/1).
 :- dynamic(tinggiPeta/1).
-:- dynamic(peta/1).
-:- dynamic(petaBackup/1).
 :- dynamic(tick/1).
+:- dynamic(terrain/3).
 
 init_map :-
-    baca_file('peta.txt',P),
-    splitList(P,'\n',PBaru),
-    asserta(peta(PBaru)),
-    asserta(petaBackup(PBaru)),
     asserta(deadzone(0)),
     asserta(tick(0)),
-    asserta(lebarPeta(26)),asserta(tinggiPeta(10)),!.
+    random(5,20,X),
+    random(5,20,Y),
+    asserta(lebarPeta(X)),asserta(tinggiPeta(Y)),
+    generateTerrain,!.
 
-reset_map :-
-    petaBackup(PBaru),
-	retract(peta(_)),
-    asserta(peta(PBaru)),!.
-
-setPixel(X,Y,C) :-
-    lebarPeta(Le),tinggiPeta(Ti),
-    X>=0,X=<Le,Y>=0,Y=<Ti,!,
-    peta(P),
-    ambil(P,Y,PBaris),
-    change(PBaris,PBarisBaru,C,X),
-    change(P,PBaru,PBarisBaru,Y),
-    retract(peta(_)),
-    asserta(peta(PBaru)),!.
-getPixel(X,Y,C) :-
-    lebarPeta(Le),tinggiPeta(Ti),
-    X>=0,X=<Le,Y>=0,Y=<Ti,!,
-    peta(P),
-    ambil(P,Y,PBaris),
-    ambil(PBaris,X,C),!.
-
+isBorderAtas(_,Y) :-
+    Y=:=0
+    ,!.
+isBorderKiri(X,_) :-
+    X=:=0,
+    !.
+isBorderBawah(_,Y) :-
+    tinggiPeta(T),
+    YMax is T+1,
+    Y=:=YMax,
+    !.
+isBorderKanan(X,_) :-
+    lebarPeta(L),
+    XMax is L+1,
+    X=:=XMax,
+    !.
 isDeadzone(X,Y) :-
     deadzone(DZ),
     lebarPeta(L),
@@ -58,20 +51,52 @@ incDeadzone :-
     retract(deadzone(DZ)),
     DZBaru is DZ+1,
     asserta(deadzone(DZBaru)),!.
-
-gambarDeadzone(0) :- !.
-gambarDeadzone(DZ) :-
-    lebarPeta(Le),tinggiPeta(Ti),
-    XMin is DZ, XMax is Le-DZ+1,
-    YMin is DZ, YMax is Ti-DZ+1,
-    forall(between(XMin,XMax,X),(setPixel(X,YMin,'X'),setPixel(X,YMax,'X'))),
-    forall(between(YMin,YMax,Y),(setPixel(XMin,Y,'X'),setPixel(XMax,Y,'X'))),
-    DZBaru is DZ-1, gambarDeadzone(DZBaru),!.
-
-gambarPlayer :-
+deadzoneDeadCheck  :-
+    healthpoint(HP),
+    HP=<0->(
+        write('Di saat-saat terakhirmu,'), nl,
+        write('Hal yang paling kau sesali adalah...'), nl,
+        write('"Kenapa aku tidak mendengarkan suara-suara itu..."'), nl,
+        kalah
+    );
+    (
+        write('Kamu merasa mendengar suara dari bawah, "Cepat kabur dari sini!"'), nl,
+        write('Haruskah kamu menaati suara tersebut?'), nl,
+        write('Semua tergantung kepadamu.'), nl
+    ),!.
+deadzoneDamage :-
     player(X,Y),
-    setPixel(X,Y,'P'),!.
-
+    isDeadzone(X,Y), !,
+    write('Kamu merasa daerah sekitarmu mengurangi kehidupanmu sedikit demi sedikit.'), nl,
+    healthpoint(HP),
+    NewHP is HP-3,
+    retract(healthpoint(_)), asserta(healthpoint(NewHP)),
+    write('HP kamu berkurang menjadi '),write(NewHP),write('.'),nl,
+    deadzoneDeadCheck,
+    !.
+deadzoneDamage :-
+    !.
+deadzoneDamageEnemy :-
+    forall(musuh(Id,X,Y,Dam,HP,Drop),(
+        isDeadzone(X,Y),
+        NewHP is HP-1,
+        retract(musuh(Id,X,Y,Dam,_,Drop)),
+        NewHP>0->(
+            asserta(musuh(Id,X,Y,Dam,NewHP,Drop))
+        );
+        (
+            write('Kamu merasakan seperti ada orang yang mati tidak jauh.'), nl   
+        )
+    )), !.
+    
+printPrio(X,Y) :-
+    isBorderKanan(X,Y), !, write('+').
+printPrio(X,Y) :-
+    isBorderKiri(X,Y), !, write('+').
+printPrio(X,Y) :-
+    isBorderAtas(X,Y), !, write('+').
+printPrio(X,Y) :-
+    isBorderBawah(X,Y), !, write('+').
 printPrio(X,Y) :-
 	musuh(_,X,Y,_,_,_),!, write('E').
 printPrio(X,Y) :-
@@ -89,20 +114,45 @@ printPrio(X,Y) :-
 printPrio(_,_) :-
 	write('-').
 
-gambarMusuh([]) :- !.
-gambarMusuh([Id|Tail]) :-
-    musuh(Id,X,Y,_,_,_),
-    setPixel(X,Y,'E'),
-    gambarMusuh(Tail), !.
+printMap(X,Y) :-
+    isBorderKanan(X,Y), !, write('+').
+printMap(X,Y) :-
+    isBorderKiri(X,Y), !, write('+').
+printMap(X,Y) :-
+    isBorderAtas(X,Y), !, write('+').
+printMap(X,Y) :-
+    isBorderBawah(X,Y), !, write('+').
+printMap(X,Y) :-
+    player(X,Y), !, write('P').
+printMap(X,Y) :-
+	isDeadzone(X,Y), !, write('X').
+printMap(_,_) :-
+	write('-').
 
-updatePeta :-
-    reset_map,
-    findall(M, musuh(M,_,_,_,_,_), ListIdMusuh),
-    deadzone(DZ),
-    gambarDeadzone(DZ),
-    gambarPlayer,
-    gambarMusuh(ListIdMusuh),!.
+/* terrain(X,Y,nama) */
+isTerrain(bukit).
+isTerrain(hutan).
+isTerrain(gunung).
+isTerrain(padang_rumput).
+isTerrain(padang_pasir).
+isTerrain(kota).
+isTerrain(desa).
 
-/* terrain(Tipe,XAtasKiri,YAtasKiri,XBawahKanan,YBawahKanan) */
-terrain(open_field,1,1,5,5).
-terrain(desert,2,2,3,3).
+
+generateTerrain:-
+    lebarPeta(L),
+    tinggiPeta(T),
+	XMin is 1,
+	XMax is L,
+	YMin is 1,
+	YMax is T,
+	forall(between(YMin,YMax,J), (
+		forall(between(XMin,XMax,I), (
+            findall(Ter,isTerrain(Ter),ListTerrain),
+            length(ListTerrain, Panjang),
+            random(0,Panjang,NoTerrain),
+            ambil(ListTerrain, NoTerrain, Terrain),
+            asserta(terrain(I,J,Terrain))
+		))
+	)),
+	!.

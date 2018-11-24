@@ -66,6 +66,13 @@ concatList([],L,L) :- !.
 concatList([Head|Tail],L,Hasil) :-
 	concatList(Tail,L,Temp),
 	appendList(Temp,Head,Hasil),!.
+/* 	assertaList(ListFakta)
+	meng-asserta semua fakta dalam ListFakta  */
+assertaList([]) :- !.
+
+assertaList([X|L]):-
+	asserta(X),
+	assertaList(L), !.
 
 /* PAIR */
 make_pair(First,Second,[First,Second]).

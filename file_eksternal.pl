@@ -11,6 +11,15 @@ baca_file(NamaFile,Isi) :-
 	repeat,
 	readData(S,Isi),
 	close(S),!.
+
+/* Membaca file menjadi list of lines */
+read_file_lines(Stream,[]) :-
+    at_end_of_stream(Stream).
+
+read_file_lines(Stream,[X|L]) :-
+    \+ at_end_of_stream(Stream),
+    read(Stream,X),
+    read_file_lines(Stream,L).
 /*-----------------------------*/
 /* Write ke file eksternal */
 writeData(_,[]) :- !.

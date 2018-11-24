@@ -1,4 +1,3 @@
-:- include('barang.pl').
 :- include('player.pl').
 :- dynamic(musuh/6).
 
@@ -203,7 +202,7 @@ serangMusuh([Id|Tail]) :-
     DarahM =< Damage,write('Anda menyerang musuh sebesar '),write(Damage),nl,
     write('Musuh mati.'),nl,
     retract(musuh(Id,Xm,Ym,_,_,_)),
-    between(1,100,IdB),\+barang(IdB,_,_,_,_),
+    between(1,500,IdB),\+barang(IdB,_,_,_,_),
     isSenjata(SenjataMusuh,DA),
     Per2 is (DA div 2),
     random(Per2,DA,DropAmmo),

@@ -11,7 +11,10 @@
 /*-----------------------------*/
 /* Command Biasa */
 update :-
-	sudahMenang(Menang),Menang == false,
+	sudahMenang(Menang),Menang == true,
+	write('Selamat, kamu menang'),nl,
+	quit,!.
+update :-
 	(
 		(tick(T), T mod 10 =:= 0,random(1,3,Banyak),
 			generateBarang(Banyak),
@@ -20,14 +23,34 @@ update :-
 		);
 		(tick(T), \+(T mod 10 =:= 0))
 	),
+	(	
+		(tick(T), \+(T mod 15 =:= 14));
+		(
+			tick(T), T mod 15 =:= 14, 
+			deadzone(DZ),
+			lebarPeta(L),
+			tinggiPeta(Ti),
+			LTmin is min(L,Ti),
+			MaxDZ is (LTmin div 2) - 1,
+			DZ < MaxDZ->(
+				incDeadzone,
+				write('Kamu mendengar suara yang sangat menyakitkan.'), nl,
+				write('Sepertinya dunia telah mengecil lagi.'), nl,
+				write('Memandangnya fenomena tersebut dengan sebelah mata, kamu melanjutkan perjalananmu.'),nl
+			);
+			(
+				write('Sepertinya dunia tidak akan lebih mengecil lagi.'), nl	
+			)
+		)
+	),
 	retract(tick(T)),
 	TBaru is T+1,
 	asserta(tick(TBaru)),
-	updateMusuh, updatePeta, !.
-update :-
-	sudahMenang(Menang),Menang == true,
-	write('Selamat, kamu menang'),nl,
-	quit,!.
+	updateMusuh,
+	deadzoneDamage,
+	deadzoneDamageEnemy,
+	narrate, !.
+
 
 start :-
 	gameMain(_),
@@ -44,12 +67,14 @@ start :-
 	write('  _   _          _   _ '),nl,
 	write(' | | | |__ __ __| | | |'),nl,
  	write(' | |_| |\\ V  V /| |_| |'),nl,
-  	write('  \\___/  \\_/\\_/  \\___/ '),nl,
-	init_player,
+	write('  \\___/  \\_/\\_/  \\___/ '),nl,
+	help,
+	randomize,
 	init_map,
-	generateBarang(5),
+	init_player,
+	generateBarang(15),
 	initMusuh(10),
-	updatePeta,!.
+	!.
 
 help :-
 	write('Daftar Command : '),nl,
@@ -66,9 +91,82 @@ help :-
 	write('11. use(object) : Menggunakan sebuah object yang dalam inventori.'),nl,
 	write('12. attack : Menyerang enemy dalam petak sama.'),nl,
 	write('13. status : Melihat status diri.'),nl,
-	write('14. save : Menyimpan permainan pemain.'),nl,
-	write('15. load : Membuka save-an pemain.'),nl,
-	write('16. help : Menampilkan ini lagi.'),nl,!.
+	write('14. save(filename) : Menyimpan permainan pemain.'),nl,
+	write('15. loads(filename) : Membuka save-an pemain.'),nl,
+	write('16. help : Menampilkan ini lagi.'),nl,
+	write('Catatan : Semua command di atas diakhiri titik (Misal : "help.")'), nl, !.
+
+loads(FileName):-
+	\+file_exists(FileName),
+	write('File tersebut tidak ada.'), nl, !.
+	
+loads(FileName):-
+	open(FileName, read, Str),
+    read_file_lines(Str,Lines),
+    close(Str),
+    assertaList(Lines), !.
+
+save(_):-
+	\+gameMain(_),
+	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
+	write('Gunakan command "start." untuk memulai game.'), nl, !.
+save(FileName):-
+	tell(FileName),
+		player(X,Y),
+		write(player(X,Y)),write('.'),nl,
+		healthpoint(HP),
+		write(healthpoint(HP)),write('.'), nl,
+		senjata(Na,Dam,Am),
+		write(senjata(Na,Dam,Am)),write('.'), nl,
+		armor(Arm),
+		write(armor(Arm)),write('.'), nl,
+		maxHealth(Maxh),
+		write(maxHealth(Maxh)),write('.'), nl,
+		maxArmor(Maxa),
+		write(maxArmor(Maxa)),write('.'), nl,
+		gameMain(GM),
+		write(gameMain(GM)),write('.'), nl,
+		deadzone(DZ),
+		write(deadzone(DZ)),write('.'), nl,
+		tick(Det),
+		write(tick(Det)),write('.'), nl,
+		lebarPeta(Le),
+		write(lebarPeta(Le)),write('.'), nl,
+		tinggiPeta(Ti),
+		write(tinggiPeta(Ti)),write('.'), nl,
+		writeMusuh, writeBarang, writeInventory, writeTerrain,
+	told, !.
+writeBarang:-
+	\+barang(_,_,_,_,_),
+	!.
+writeBarang:-
+	forall(barang(Id,Na,X,Y,Atrib),(
+		write(barang(Id,Na,X,Y,Atrib)),write('.'), nl
+	)), !.
+
+writeMusuh:-
+	\+musuh(_,_,_,_,_,_),
+	!.
+writeMusuh:-
+	forall(musuh(Id,Na,X,Y,Atrib,D),(
+		write(musuh(Id,Na,X,Y,Atrib,D)),write('.'), nl	
+	)), !.
+
+writeInventory:-
+	\+inventory(_,_),
+	!.
+writeInventory:-
+	forall(inventory(N,A),(
+		write(inventory(N,A)),write('.'), nl	
+	)), !.
+
+writeTerrain:-
+	\+terrain(_,_,_),
+	!.
+writeTerrain:-
+	forall(terrain(X,Y,Na),(
+		write(terrain(X,Y,Na)),write('.'), nl	
+	)), !.
 
 look :-
 	\+gameMain(_),
@@ -94,7 +192,19 @@ map :-
 	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
 	write('Gunakan command "start." untuk memulai game.'), nl, !.
 map :-
-	peta(X), printList2D(X),!.
+	tinggiPeta(T),
+	lebarPeta(L),
+	XMin is 0,
+	XMax is L+1,
+	YMin is 0,
+	YMax is T+1,
+	forall(between(YMin,YMax,J), (
+		forall(between(XMin,XMax,I), (
+			printMap(I,J)
+		)),
+		nl
+	)),
+	!.
 
 
 status :-
@@ -161,7 +271,7 @@ take(Object) :-
 	addToInventory(Object,D)->
 	(
 		retract(barang(Id,Object,X,Y,D)),write('Kamu mengambil 1 '),write(Object),
-		write(' dan menaruhnya di inventory'),nl
+		write(' dan menaruhnya di inventory'),nl, update, !
 	);(
 		write('Gagal menambahkan karena inventory penuh'),nl
 	),
@@ -189,10 +299,11 @@ drop(Object) :-
 		(
 			IdxItem is Kode-1,ambil(ListObj,IdxItem,Atrib),
 			delFromInventory(Object,Atrib)->
-			between(1,100,Id),\+barang(Id,_,_,_,_),
+			between(1,500,Id),\+barang(Id,_,_,_,_),
 			player(X,Y),
 			asserta(barang(Id,Object,X,Y,Atrib)),
-			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl,
+			update, !
 		);(
 			write('Kode tidak valid'),fail,!
 		)
@@ -201,7 +312,7 @@ drop(Object) :-
 		inventory(Object,Atribut),
 		delFromInventory(Object,Atribut)->
 		(
-			between(1,100,Id),\+barang(Id,_,_,_,_),
+			between(1,500,Id),\+barang(Id,_,_,_,_),
 			player(X,Y),
 			asserta(barang(Id,Object,X,Y,Atribut)),
 			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
@@ -236,7 +347,8 @@ use(Object) :-
 				(isSenjata(Object,_),equipSenjata(Object,Atrib));
 				(isArmor(Object,_),equipArmor(Object,Atrib));
 				(isMedicine(Object,_),useMedicine(Object,Atrib))
-			)
+			),
+			update, !
 		);
 		(
 			write('Kode tidak valid'),fail,!
@@ -271,9 +383,7 @@ n :-
 n :-
 	retract(player(X,Y)),
 	Y > 1,
-	setPixel(X,Y,'-'),
 	YBaru is Y-1,
-	setPixel(X,YBaru,'P'),
 	write([X,YBaru]),nl,
 	asserta(player(X,YBaru)),update,!.
 e :-
@@ -289,9 +399,7 @@ e :-
 	retract(player(X,Y)),
 	lebarPeta(Le),
 	X < Le,
-	setPixel(X,Y,'-'),
 	XBaru is X+1,
-	setPixel(XBaru,Y,'P'),
 	write([XBaru,Y]),nl,
 	asserta(player(XBaru,Y)),update,!.
 w :-
@@ -305,9 +413,7 @@ w :-
 w :-
 	retract(player(X,Y)),
 	X > 1,
-	setPixel(X,Y,'-'),
 	XBaru is X-1,
-	setPixel(XBaru,Y,'P'),
 	write([XBaru,Y]),nl,
 	asserta(player(XBaru,Y)),update,!.
 s :-
@@ -323,9 +429,7 @@ s :-
 	retract(player(X,Y)),
 	tinggiPeta(Ti),
 	Y < Ti,
-	setPixel(X,Y,'-'),
 	YBaru is Y+1,
-	setPixel(X,YBaru,'P'),
 	write([X,YBaru]),nl,
 	asserta(player(X,YBaru)),update,!.
 /*-----------------------------*/
@@ -337,7 +441,7 @@ sudahMenang(false).
 
 generateBarang(0) :- !.
 generateBarang(Banyak) :-
-    (between(1,100,Id),\+barang(Id,_,_,_,_)),
+    (between(1,500,Id),\+barang(Id,_,_,_,_)),
     findall(S,isSenjata(S,_),ListSenjata),
     findall(A,isArmor(A,_),ListArmor),
     findall(O,isMedicine(O,_),ListMedicine),

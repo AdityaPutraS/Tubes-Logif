@@ -12,7 +12,11 @@
 
 init_player :-
 	asserta(gameMain(1)),
-	asserta(player(6,5)),
+	lebarPeta(L),
+	tinggiPeta(T),
+	random(1,L,X),
+	random(1,T,Y),
+	asserta(player(X,Y)),
 	asserta(healthpoint(100)),
 	asserta(senjata(ak47,20,100)),
 	asserta(armor(0)),
@@ -34,24 +38,38 @@ quit :-
 	retract(maxInventory(_)),
 	write('Game selesai.'),nl,
 	retract(gameMain(_)),
-	peta(_)->(
-		retract(peta(_)),
-		inventory(_,_)->(
-			retract(inventory(_,_))
-		);
-		(
-			write('')
-		)
-	);
-	(
-		inventory(_,_)->(
-			retract(inventory(_,_))
-		);
-		(
-			write('')
-		)	
-	), 
+    retract(deadzone(_)),
+    retract(tick(_)),
+	retract(lebarPeta(_)),retract(tinggiPeta(_)),
+	retractMusuh, retractBarang, retractInventory,retractTerrain,
 	!.
+
+retractBarang:-
+	\+barang(_,_,_,_,_),
+	!.
+retractBarang:-
+	retract(barang(_,_,_,_,_)),
+	retractBarang, !.
+
+retractMusuh:-
+	\+musuh(_,_,_,_,_,_),
+	!.
+retractMusuh:-
+	retract(musuh(_,_,_,_,_,_)),
+	retractMusuh, !.
+
+retractInventory:-
+	\+inventory(_,_),
+	!.
+retractInventory:-
+	retract(inventory(_,_)),
+	retractInventory, !.
+retractTerrain:-
+	\+terrain(_,_,_),
+	!.
+retractTerrain:-
+	retract(terrain(_,_,_)),
+	retractTerrain, !.
 
 cekPanjangInv(Panjang) :-
 	findall(B,inventory(B,_),ListBanyak),
@@ -101,7 +119,7 @@ masukkanAmmo(OldSenjata, OldAmmo):-
 		write(' di inventory.'),nl,
 		write('Tetapi gagal, karena inventory sudah penuh.'), nl,
 		write('Setelah memikirkannya kembali, akhirnya kamu menjatuhkannya ke tanah.'), nl,
-		between(1,100,Id),\+barang(Id,_,_,_,_),
+		between(1,500,Id),\+barang(Id,_,_,_,_),
 		player(X,Y),
 		asserta(barang(Id,NamaAmmo,X,Y,OldAmmo))
 	), !.
@@ -191,5 +209,140 @@ equipArmor(Nama, ArmorPoint):-
 	), !.
 
 kalah :- 
-	write('Kamu kalah cok'),
-	quit,!.
+	write('Kamu kalah'),
+	quit,
+	fail, !.
+
+narrate :-
+	narratePlayer,
+	write('Kamu melihat sekeliling kamu.'), nl,
+	narrateNorth,
+	narrateWest,
+	narrateEast,
+	narrateSouth, !.
+
+narratePlayer :-
+	player(X,Y),
+	terrain(X,Y,NamaTerrain),
+	write('Kamu berada di sebuah '), write(NamaTerrain), write('.'), nl,
+	forall(barang(_,NamaBarang,X,Y,_), (
+		write('    Di tempat ini, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+	)),
+	findall(Id, musuh(Id,X,Y,_,_,_), ListMusuh),
+	length(ListMusuh, BanyakMusuh),
+	BanyakMusuh>0->(
+		write('    Di tempat ini, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+	);
+	(
+		write('    Di tempat ini sepertinya tidak ada musuh.'), nl	
+	),
+	!.
+
+narrateNorth :-
+	player(X,Y),
+	YNorth is Y-1,
+	YNorth>0->(
+		terrain(X,YNorth,NamaTerrain),
+		write('Di arah utara ada sebuah '), write(NamaTerrain), write('.'), nl,
+		forall(barang(_,NamaBarang,X,YNorth,_), (
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+		)),
+		narrateDeadzone(X,YNorth),
+		findall(Id, musuh(Id,X,YNorth,_,_,_), ListMusuh),
+		length(ListMusuh, BanyakMusuh),
+		BanyakMusuh>0->(
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+		);
+		(
+			write('')	
+		)
+	);
+	(
+		write('Somehow, kamu tidak bisa melihat apapun di arah utara.'), nl,
+		write('Apakah ini yang dimaksud dengan ujung dunia ?'), nl
+	),
+	!.
+
+narrateSouth :-
+	player(X,Y),
+	tinggiPeta(T),
+	YSouth is Y+1,
+	YSouth=<T->(
+		terrain(X,YSouth,NamaTerrain),
+		write('Di arah selatan ada sebuah '), write(NamaTerrain), write('.'), nl,
+		forall(barang(_,NamaBarang,X,YSouth,_), (
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+		)),
+		narrateDeadzone(X,YSouth),
+		findall(Id, musuh(Id,X,YSouth,_,_,_), ListMusuh),
+		length(ListMusuh, BanyakMusuh),
+		BanyakMusuh>0->(
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+		);
+		(
+			write('')	
+		)
+	);
+	(
+		write('Somehow, kamu tidak bisa melihat apapun di arah selatan.'), nl,
+		write('Apakah ini yang dimaksud dengan ujung dunia ?'), nl
+	),
+	!.
+
+narrateWest :-
+	player(X,Y),
+	XWest is X-1,
+	XWest>0->(
+		terrain(XWest,Y,NamaTerrain),
+		write('Di arah barat ada sebuah '), write(NamaTerrain), write('.'), nl,
+		forall(barang(_,NamaBarang,XWest,Y,_), (
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+		)),
+		narrateDeadzone(XWest,Y),
+		findall(Id, musuh(Id,XWest,Y,_,_,_), ListMusuh),
+		length(ListMusuh, BanyakMusuh),
+		BanyakMusuh>0->(
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl
+		);
+		(
+			write('')	
+		)
+	);
+	(
+		write('Somehow, kamu tidak bisa melihat apapun di arah barat.'), nl,
+		write('Apakah ini yang dimaksud dengan ujung dunia ?'), nl
+	),
+	!.
+
+narrateEast :-
+	player(X,Y),
+	lebarPeta(L),
+	XEast is X+1,
+	XEast=<L->(
+		terrain(XEast,Y,NamaTerrain),
+		write('Di arah timur ada sebuah '), write(NamaTerrain), write('.'), nl,
+		forall(barang(_,NamaBarang,XEast,Y,_), (
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+		)),
+		narrateDeadzone(XEast,Y),
+		findall(Id, musuh(Id,XEast,Y,_,_,_), ListMusuh),
+		length(ListMusuh, BanyakMusuh),
+		BanyakMusuh>0->(
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+		);
+		(
+			write('')	
+		)
+	);
+	(
+		write('Somehow, kamu tidak bisa melihat apapun di arah timur.'), nl,
+		write('Apakah ini yang dimaksud dengan ujung dunia ?'), nl
+	),
+	!.
+
+
+narrateDeadzone(X,Y) :-
+	\+isDeadzone(X,Y), !.
+narrateDeadzone(_,_) :-
+	write('    Kamu merasakan aura kematian di arah sana.'), nl,
+	write('    Sebaiknya tidak pergi kesana....'), nl, !.
