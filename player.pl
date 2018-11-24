@@ -18,7 +18,6 @@ init_player :-
 	random(1,T,Y),
 	asserta(player(X,Y)),
 	asserta(healthpoint(100)),
-	asserta(senjata(ak47,20,100)),
 	asserta(armor(0)),
 	asserta(maxInventory(10)),
 	asserta(maxHealth(100)),
@@ -31,7 +30,7 @@ quit :-
 quit :-
 	retract(player(_,_)),
 	retract(healthpoint(_)),
-	retract(senjata(_,_,_)),
+	retractSenjata,
 	retract(armor(_)),
 	retract(maxHealth(_)),
 	retract(maxArmor(_)),
@@ -42,6 +41,13 @@ quit :-
     retract(tick(_)),
 	retract(lebarPeta(_)),retract(tinggiPeta(_)),
 	retractMusuh, retractBarang, retractInventory,retractTerrain,
+	!.
+
+retractSenjata:-
+	\+senjata(_,_,_),
+	!.
+retractSenjata:-
+	retract(senjata(_,_,_)),
 	!.
 
 retractBarang:-
@@ -91,6 +97,13 @@ delFromInventory(Object,Atribut) :-
 	!.
 
 equipSenjata(NewSenjata,NewDamage):-
+	\+senjata(_,_,_),
+	delFromInventory(NewSenjata,NewDamage),
+	asserta(senjata(NewSenjata,NewDamage,0)),
+	isAmmo(NamaAmmo,_,NewSenjata),
+	write('Senjata '), write(NewSenjata), write(' yang kamu pakai masih kosong.'), nl,
+	write('Use '), write(NamaAmmo), write(' terlebih dahulu sebelum menyerang musuh.'), !.
+equipSenjata(NewSenjata,NewDamage):-
 	delFromInventory(NewSenjata,NewDamage),
 	retract(senjata(OldSenjata,OldDamage,OldAmmo)),
 	asserta(senjata(NewSenjata,NewDamage,0)),
@@ -98,7 +111,6 @@ equipSenjata(NewSenjata,NewDamage):-
 	write('Kamu meletakkan '),write(OldSenjata),
 	write(' yang kamu pakai sebelumnya di inventory'),
 	masukkanAmmo(OldSenjata, OldAmmo), !.
-
 masukkanAmmo(_, OldAmmo):-
 	OldAmmo < 1,write('.'), nl, !.
 masukkanAmmo(OldSenjata, OldAmmo):-
@@ -208,8 +220,22 @@ equipArmor(Nama, ArmorPoint):-
 		retract(armor(_)),asserta(armor(NewArmor))
 	), !.
 
+equipBag(Nama, Kapasitas) :-
+	maxInventory(PrevMax),
+	NewMax is PrevMax+Kapasitas,
+	delFromInventory(Nama,Kapasitas),
+	retract(maxInventory(_)),
+	asserta(maxInventory(NewMax)),
+	write('Kamu mengambil '), write(Nama), write(' dari dalam inventory dan memakainya bersama dengan inventory sebelumya.'), nl,
+	write('Aneh memang, tapi "Truth is stranger than fiction."'), nl,
+	write('Kamu bisa menyimpan '),write(NewMax),write(' barang sekarang.'), nl,
+	write(Kapasitas), write(' barang lebih banyak daripada sebelumnya.'), nl,
+	!.
+
 kalah :- 
-	write('Kamu kalah'),
+	write('Kamu kalah, tapi percayalah bahwa suatu saat kamu akan menang.'), nl,
+	write('Terimakasih sudah bermain.'), nl,
+	write('Arigatou! UwU'), nl,
 	quit,
 	fail, !.
 

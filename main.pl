@@ -13,13 +13,16 @@
 update :-
 	sudahMenang(Menang),Menang == true,
 	write('Selamat, kamu menang'),nl,
+	write('Terimakasih sudah bermain'), nl,
+	write('Arigatou! UwU'), nl,
 	quit,!.
 update :-
 	(
 		(tick(T), T mod 10 =:= 0,random(1,3,Banyak),
 			generateBarang(Banyak),
 			write('Supply drop sudah datang, '),write('ada '),write(Banyak),
-			write(' barang di peta jatuh secara acak, cari ya'),nl
+			write(' barang di peta jatuh secara acak.'),nl,
+			write('Carilah! jika kau pikir kau mampu.'), nl
 		);
 		(tick(T), \+(T mod 10 =:= 0))
 	),
@@ -184,6 +187,17 @@ look :-
 		)),
 		nl
 	)),
+	write('Keterangan Simbol :'), nl,
+	write('P    :    Player'), nl,
+	write('E    :    Enemy'), nl,
+	write('S    :    Senjata'), nl,
+	write('M    :    Ammo'), nl,
+	write('O    :    Medicine'), nl,
+	write('B    :    Bag'), nl,
+	write('A    :    Armor'), nl,
+	write('+    :    Border'), nl,
+	write('X    :    Deadzone'), nl,
+	write('-    :    Nothing of interest'), nl,
 	!.
 
 
@@ -204,6 +218,11 @@ map :-
 		)),
 		nl
 	)),
+	write('Keterangan Simbol :'), nl,
+	write('P    :    Player'), nl,
+	write('+    :    Border'), nl,
+	write('X    :    Deadzone'), nl,
+	write('-    :    Nothing of interest'), nl,
 	!.
 
 
@@ -212,12 +231,13 @@ status :-
 	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
 	write('Gunakan command "start." untuk memulai game.'), nl, !.
 status :-
-	write('Health           : '),healthpoint(Darah),write(Darah),nl,
-	write('Armor            : '),armor(ArmorP),write(ArmorP),nl,
-	write('Tipe Senjata     : '),senjata(Sen,Dam,Ammo),write(Sen),nl,
-	write('Damage Senjata   : '),write(Dam),nl,
-	write('Banyak Ammo      : '),write(Ammo),write(' peluru'),nl,
-	write('Inventory        : '),nl,
+	write('Health             : '),healthpoint(Darah),write(Darah),nl,
+	write('Armor              : '),armor(ArmorP),write(ArmorP),nl,
+	write('Tipe Senjata       : '),senjata(Sen,Dam,Ammo),write(Sen),nl,
+	write('Damage Senjata     : '),write(Dam),nl,
+	write('Banyak Ammo        : '),write(Ammo),write(' peluru'),nl,
+	write('Kapasitas inventory: '),maxInventory(MaxInv),write(MaxInv),write(' barang'), nl,
+	write('Isi inventory      : '),nl,
 	inventory(_,_)->(
 		forall(inventory(Obj,Atribut),
 		(
@@ -226,7 +246,8 @@ status :-
 				(isAmmo(Obj,_,_),write(' peluru'));
 				(isSenjata(Obj,_),write(' damage'));
 				(isArmor(Obj,_),write(' defense'));
-				(isMedicine(Obj,_),write(' HP'))
+				(isMedicine(Obj,_),write(' HP'));
+				(isBag(Obj,_),write(' barang'))
 			),nl
 		))
 	);(
@@ -244,25 +265,31 @@ attack :-
 	findall(M,musuh(M,X,Y,_,_,_),ListId),
 	\+kosong(ListId),
 	length(ListId,BanyakM),
-	write('Ada '),write(BanyakM),write(' musuh di petak ini'),nl,
+	terrain(X,Y,Ter),
+	write('Kamu mencoba menembak '),write(BanyakM),write(' musuh yang berada di '),write(Ter),write(' tersebut.'),nl,
 	serangMusuh(ListId),update,!.
 attack :-
 	player(X,Y),
 	findall(M,musuh(M,X,Y,_,_,_),ListId),
 	kosong(ListId),
-	write('Ga ada musuh buat diserang cok!'),nl,update,!.
+	write('Kamu mencari musuh untuk diserang selama beberapa saat...'),nl,
+	write('Kamu tidak menemukan musuh sama sekali dan hanya membuang waktu.'),nl,update,!.
 attack :-
 	senjata(none,_,_),
-	write('Butuh senjata untuk menyerang musuh kawanku'),nl,update,!.
+	write('Kamu mau mencoba melawan musuh bersenjata jarak jauh mematikan dengan tangan kosong?!'),nl,
+	write('Tidak ada yang melarang, tapi, tapi....'),nl,update,!.
 /* Inventory */
 take(_) :-
 	\+gameMain(_),
 	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
 	write('Gunakan command "start." untuk memulai game.'), nl, !.
 take(Object) :-
-	player(X,Y),
+	player(X,Y), 
 	\+barang(_,Object,X,Y,_), !,
-	write('Barang yang kamu cari tidak ditemukan'), nl,
+	terrain(X,Y,Ter),
+	write('Kamu mencoba mencari '),write(Object),write(' di seluruh penjuru '),write(Ter),write(' tersebut.'), nl,
+	write('Setelah pencarian yang lama.......'), nl,
+	write('Kamu tidak menemukan apapun, melainkan kehilangan waktu yang berharga.'), nl,
 	update, !.
 take(Object) :-
 	player(X,Y),
@@ -273,7 +300,9 @@ take(Object) :-
 		retract(barang(Id,Object,X,Y,D)),write('Kamu mengambil 1 '),write(Object),
 		write(' dan menaruhnya di inventory'),nl, update, !
 	);(
-		write('Gagal menambahkan karena inventory penuh'),nl
+		write('Kamu mencoba memaksakan masuk '), write(Object), write(' ke dalam inventory dengan harapan,'), nl,
+		write('"Satu barang lagi harusnya tidak masalah, iya kan?"'),nl,
+		write('Tapi sayangnya, yang kamu dapatkan dari perjuangan tersebut hanyalah harapan yang lenyap.'),nl
 	),
 	update, !.
 
@@ -294,7 +323,7 @@ drop(Object) :-
 			write('   '),write(I),write('. '),write(Object),write(' , Atribut : '),
 			ambil(ListObj,Idx,C),write(C),nl
 		)),
-		write('Masukan kode item yang ingin kamu drop (akhiri dengan . ) : '),
+		write('Masukan kode item yang ingin kamu drop (akhiri dengan . misal : "1.") : '),
 		read(Kode),between(1,Panjang,Kode)->
 		(
 			IdxItem is Kode-1,ambil(ListObj,IdxItem,Atrib),
@@ -302,7 +331,7 @@ drop(Object) :-
 			between(1,500,Id),\+barang(Id,_,_,_,_),
 			player(X,Y),
 			asserta(barang(Id,Object,X,Y,Atrib)),
-			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl,
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah.'),nl,
 			update, !
 		);(
 			write('Kode tidak valid'),fail,!
@@ -315,9 +344,10 @@ drop(Object) :-
 			between(1,500,Id),\+barang(Id,_,_,_,_),
 			player(X,Y),
 			asserta(barang(Id,Object,X,Y,Atribut)),
-			write('Kamu menjatuhkan 1 '),write(Object),write(' ke tanah'),nl
+			write('Kamu menjatuhkan 1 '),write(Object),write(' ke bawah, dengan harapan tidak akan disalahgunakan'),nl
 		);(
-			write(Object),write(' harus ada di inventory agar bisa dijatuhkan'),nl
+			write('Kamu mencari-cari '),write(Object),write(' di dalam inventory.'), nl,
+			write('Akhirnya kamu tersadar kalau sebenarnya kamu tidak memiliki barang tersebut.'),nl
 		)
 	),
 	update,!. 
@@ -339,14 +369,15 @@ use(Object) :-
 			write('   '),write(I),write('. '),write(Object),write(' , Atribut : '),
 			ambil(ListObj,Idx,C),write(C),nl
 		)),
-		write('Masukan kode item yang ingin kamu use (akhiri dengan . ) : '),
+		write('Masukan kode item yang ingin kamu use (akhiri dengan . misal : "1.") : '),
 		read(Kode),between(1,Panjang,Kode)->(
 			IdxItem is Kode-1,ambil(ListObj,IdxItem,Atrib),
 			(
 				(isAmmo(Object,_,_),useAmmo(Object,Atrib));
 				(isSenjata(Object,_),equipSenjata(Object,Atrib));
 				(isArmor(Object,_),equipArmor(Object,Atrib));
-				(isMedicine(Object,_),useMedicine(Object,Atrib))
+				(isMedicine(Object,_),useMedicine(Object,Atrib));
+				(isBag(Object,_),equipBag(Object,Atrib))
 			),
 			update, !
 		);
@@ -360,7 +391,8 @@ use(Object) :-
 			(isAmmo(Object,_,_),useAmmo(Object,Atribut));
 			(isSenjata(Object,_),equipSenjata(Object,Atribut));
 			(isArmor(Object,_),equipArmor(Object,Atribut));
-			(isMedicine(Object,_),useMedicine(Object,Atribut))
+			(isMedicine(Object,_),useMedicine(Object,Atribut));
+			(isBag(Object,_),equipBag(Object,Atribut))
 		);
 		(
 			write('Kamu tidak memiliki '),write(Object),write('.'),nl,
@@ -379,7 +411,9 @@ n :-
 n :-
 	player(_,Y),
 	Y =:= 1,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Kamu tidak bisa melihat apapun di utara, namun kamu tetap mencoba berjalan kesana.'),nl,
+	write('Setelah sekian lama berjalan, kamu tersadar bahwa sekeliling kamu tidak pernah berubah sedikit pun.'),nl,
+	write('Akhirnya kamu memutuskan untuk berhenti mencoba.'),nl,update,!.
 n :-
 	retract(player(X,Y)),
 	Y > 1,
@@ -394,7 +428,9 @@ e  :-
 	player(X,_),
 	lebarPeta(Le),
 	X =:= Le,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Kamu tidak bisa melihat apapun di timur, namun kamu tetap mencoba berjalan kesana.'),nl,
+	write('Setelah sekian lama berjalan, kamu tersadar bahwa sekeliling kamu tidak pernah berubah sedikit pun.'),nl,
+	write('Akhirnya kamu memutuskan untuk berhenti mencoba.'),nl,update,!.
 e :-
 	retract(player(X,Y)),
 	lebarPeta(Le),
@@ -409,7 +445,9 @@ w :-
 w :-
 	player(X,_),
 	X =:= 1,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Kamu tidak bisa melihat apapun di barat, namun kamu tetap mencoba berjalan kesana.'),nl,
+	write('Setelah sekian lama berjalan, kamu tersadar bahwa sekeliling kamu tidak pernah berubah sedikit pun.'),nl,
+	write('Akhirnya kamu memutuskan untuk berhenti mencoba.'),nl,update,!.
 w :-
 	retract(player(X,Y)),
 	X > 1,
@@ -424,7 +462,9 @@ s :-
 	player(_,Y),
 	tinggiPeta(Ti),
 	Y =:= Ti,
-	write('Gabisa Cok!'),nl,update,!.
+	write('Kamu tidak bisa melihat apapun di selatan, namun kamu tetap mencoba berjalan kesana.'),nl,
+	write('Setelah sekian lama berjalan, kamu tersadar bahwa sekeliling kamu tidak pernah berubah sedikit pun.'),nl,
+	write('Akhirnya kamu memutuskan untuk berhenti mencoba.'),nl,update,!.
 s :-
 	retract(player(X,Y)),
 	tinggiPeta(Ti),
@@ -445,18 +485,20 @@ generateBarang(Banyak) :-
     findall(S,isSenjata(S,_),ListSenjata),
     findall(A,isArmor(A,_),ListArmor),
     findall(O,isMedicine(O,_),ListMedicine),
-    findall(M,isAmmo(M,_,_),ListAmmo),
+	findall(M,isAmmo(M,_,_),ListAmmo),
+	findall(B,isBag(B,_),ListBag),
     concatList(ListSenjata,ListArmor,L),
     concatList(L,ListMedicine,L2),
-    concatList(L2,ListAmmo,L3),
-    length(L3,Panjang),
+	concatList(L2,ListAmmo,L3),
+	concatList(L3,ListBag,L4),
+    length(L4,Panjang),
     random(1,Panjang,X),
-    ambil(L3,X,Barang),
+    ambil(L4,X,Barang),
     lebarPeta(Le),tinggiPeta(Ti),
 	random(1,Le,XPos),random(1,Ti,YPos),
 	(
 		/* TODO : Randomize D */
-		(isSenjata(Barang,D);isArmor(Barang,D);isAmmo(Barang,D,_);isMedicine(Barang,D)),
+		(isSenjata(Barang,D);isArmor(Barang,D);isAmmo(Barang,D,_);isMedicine(Barang,D);isBag(Barang,D)),
 		asserta(barang(Id,Barang,XPos,YPos,D))
 	),
     BanyakBaru is Banyak-1,

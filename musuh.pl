@@ -27,8 +27,15 @@ updatePosisiMusuh([Id|Tail]) :-
     tentukanAksi(Id,Acak),
     updatePosisiMusuh(Tail),!.
 
+tentukanAksi(Id,Mov) :-
+    Mov > 99,
+    healMusuh(Id,10), !.
 tentukanAksi(_,Mov) :-
-    Mov > 75, !.
+    Mov > 74, !.
+tentukanAksi(Id,Mov) :-
+    Mov > 25, 
+    randomMusuh(Id),
+    !.
 tentukanAksi(Id,_) :-
     musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
     Xm =:= Xp,Ym =:= Yp, !.
@@ -135,6 +142,37 @@ sMusuh(Id) :-
     assertz(musuh(Id,Xm,YmBaru,Damage,Health,ItemDrop)),!.
 sMusuh(Id) :-
     nMusuh(Id),!.
+randomMusuh(Id) :-
+    random(1,100,X),
+    tentukanArah(Id,X),
+    !.
+tentukanArah(Id,X) :-
+    X>75,
+    nMusuh(Id),
+    !.
+tentukanArah(Id,X) :-
+    X>50,
+    eMusuh(Id),
+    !.
+tentukanArah(Id,X) :-
+    X>25,
+    wMusuh(Id),
+    !.
+tentukanArah(Id,_) :-
+    sMusuh(Id),
+    !.
+
+healMusuh(Id,Recov):-
+    musuh(Id,_,_,_,HP,_),
+    BedaHP is 100-HP,
+    BedaHP >= Recov,
+    NewHP is HP + Recov,
+    retract(musuh(Id,X,Y,Dam,_,Drop)),
+    asserta(musuh(Id,X,Y,Dam,NewHP,Drop)),
+    !.
+healMusuh(_,_) :-
+    !.
+
 
 serangPlayer(Damage) :-
     armor(Armor),
@@ -200,11 +238,11 @@ serangMusuh([Id|Tail]) :-
         asserta(senjata(Senjata,Damage,BanyakAmBaru)),
     isSenjata(SenjataMusuh,_),
     DarahM =< Damage,write('Anda menyerang musuh sebesar '),write(Damage),nl,
-    write('Musuh mati.'),nl,
-    retract(musuh(Id,Xm,Ym,_,_,_)),
+    write('Musuh mati dan menjatuhkan '),write(SenjataMusuh),write(' miliknya.'),nl,
+    retract(musuh(Id,Xm,Ym,Dam,_,_)),
     between(1,500,IdB),\+barang(IdB,_,_,_,_),
-    isSenjata(SenjataMusuh,DA),
-    Per2 is (DA div 2),
-    random(Per2,DA,DropAmmo),
-    asserta(barang(Id,SenjataMusuh,Xm,Ym,DropAmmo)),
+    isSenjata(SenjataMusuh,_),
+    Times2 is (Dam * 2),
+    random(Dam,Times2,DamageSenjata),
+    asserta(barang(Id,SenjataMusuh,Xm,Ym,DamageSenjata)),
     serangMusuh(Tail),!.

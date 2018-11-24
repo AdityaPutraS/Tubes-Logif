@@ -76,18 +76,35 @@ deadzoneDamage :-
     !.
 deadzoneDamage :-
     !.
+
 deadzoneDamageEnemy :-
-    forall(musuh(Id,X,Y,Dam,HP,Drop),(
+    forall(musuh(Id,X,Y,_,HP,_),(
         isDeadzone(X,Y),
         NewHP is HP-1,
+        deadzoneEnemyDeadCheck(Id,NewHP)
+    )),
+    deadzoneWinCheck, !.
+deadzoneDamageEnemy :-
+    !.
+deadzoneEnemyDeadCheck(Id,NewHP) :-
+    NewHP>0->(
         retract(musuh(Id,X,Y,Dam,_,Drop)),
-        NewHP>0->(
-            asserta(musuh(Id,X,Y,Dam,NewHP,Drop))
-        );
-        (
-            write('Kamu merasakan seperti ada orang yang mati tidak jauh.'), nl   
-        )
-    )), !.
+        asserta(musuh(Id,X,Y,Dam,NewHP,Drop))
+    );
+    (
+        retract(musuh(Id,Xm,Ym,Damage,_,Senjata)),
+        between(1,500,IdB),\+barang(IdB,_,_,_,_),
+        Times2 is (Damage * 2),
+        random(Damage,Times2,DamageSenjata),
+        asserta(barang(Id,Senjata,Xm,Ym,DamageSenjata)),
+        write('Kamu merasakan seperti ada orang yang mati tidak jauh.'), nl,
+        write('Mungkin dia meninggalkan sesuatu sebelum pergi.'), nl  
+    ), !.
+deadzoneWinCheck :-
+    \+musuh(_,_,_,_,_,_),
+    update, !.
+deadzoneWinCheck :-
+    !.
     
 printPrio(X,Y) :-
     isBorderKanan(X,Y), !, write('+').
@@ -107,6 +124,8 @@ printPrio(X,Y) :-
 	isArmor(Nama,_), barang(_,Nama,X,Y,_), !, write('A').
 printPrio(X,Y) :-
 	isAmmo(Nama,_,_), barang(_,Nama,X,Y,_), !, write('M').
+printPrio(X,Y) :-
+    isBag(Nama,_), barang(_,Nama,X,Y,_), !, write('B').
 printPrio(X,Y) :-
 	player(X,Y), !, write('P').
 printPrio(X,Y) :-
