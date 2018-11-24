@@ -119,8 +119,7 @@ save(FileName):-
 		write(player(X,Y)),write('.'),nl,
 		healthpoint(HP),
 		write(healthpoint(HP)),write('.'), nl,
-		senjata(Na,Dam,Am),
-		write(senjata(Na,Dam,Am)),write('.'), nl,
+		writeSenjata,
 		armor(Arm),
 		write(armor(Arm)),write('.'), nl,
 		maxHealth(Maxh),
@@ -139,6 +138,13 @@ save(FileName):-
 		write(tinggiPeta(Ti)),write('.'), nl,
 		writeMusuh, writeBarang, writeInventory, writeTerrain,
 	told, !.
+writeSenjata:-
+	\+senjata(_,_,_),
+	!.
+writeSenjata:-
+	senjata(Na,Dam,Am),
+	write(senjata(Na,Dam,Am)),write('.'), nl,
+	!.
 writeBarang:-
 	\+barang(_,_,_,_,_),
 	!.
