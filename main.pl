@@ -277,7 +277,10 @@ attack :-
 	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
 	write('Gunakan command "start." untuk memulai game.'), nl, !.
 attack :-
-	\+senjata(none,_,_),
+	\+senjata(_,_,_),
+	write('Kamu mau mencoba melawan musuh bersenjata jarak jauh mematikan dengan tangan kosong?!'),nl,
+	write('Tidak ada yang melarang, tapi, tapi....'),nl,update,!.
+attack :-
 	player(X,Y),
 	findall(M,musuh(M,X,Y,_,_,_),ListId),
 	\+kosong(ListId),
@@ -291,10 +294,6 @@ attack :-
 	kosong(ListId),
 	write('Kamu mencari musuh untuk diserang selama beberapa saat...'),nl,
 	write('Kamu tidak menemukan musuh sama sekali dan hanya membuang waktu.'),nl,update,!.
-attack :-
-	senjata(none,_,_),
-	write('Kamu mau mencoba melawan musuh bersenjata jarak jauh mematikan dengan tangan kosong?!'),nl,
-	write('Tidak ada yang melarang, tapi, tapi....'),nl,update,!.
 /* Inventory */
 take(_) :-
 	\+gameMain(_),
