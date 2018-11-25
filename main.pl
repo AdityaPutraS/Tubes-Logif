@@ -12,7 +12,13 @@
 /* Command Biasa */
 update :-
 	sudahMenang(Menang),Menang == true,
-	write('Selamat, kamu menang'),nl,
+	wirte('Tiba-tiba di bawah kakimu muncul sebuah magic circle.'),nl,
+	write('Kamu berusaha keluar dari magic circle tersebut tapi apapun yang kamu lakukan kamu tidak dapat kabur dari magic circle tersebut.'),nl,
+	write('Sebuah cahaya terang membutakan dirimu.'),nl,
+	write('Saat kamu terbangun, kamu tersadar bahwa kamu telah kembali ke dunia asal mu.'),nl,
+	write('Saat kamu meraba-raba sakumu,kamu tersadar terdapat sebuah kertas di saku belakangmu.'),nl,
+	write('Isi dari kertas tersebut adalah'),nl,nl,
+	write('Selamat, kamu menang'),nl,nl,
 	write('Terimakasih sudah bermain'), nl,
 	quit,!.
 update :-

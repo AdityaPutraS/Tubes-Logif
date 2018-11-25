@@ -235,7 +235,16 @@ equipBag(Nama, Kapasitas) :-
 	!.
 
 kalah :-
-	write('Kamu kalah, tapi percayalah bahwa suatu saat kamu akan menang.'), nl,
+	write('Kamu memegang luka terbukamu yang dihasilkan oleh tembakan dari lawan.'),nl,
+	write('Kamu mengenang semua ingatan-ingatan yang telah kamu lalui.'),nl,
+	write('Lalu kamu teringat penyesalan paling besarmu.'),nl,
+	write('Kamu '),nl,nl,
+	write('Belum'),nl,nl,
+	write('Menyatakan'),nl,nl,
+	write('Perasaan mu'),nl,nl,
+	write('Pada dia'),nl,nl,
+	write('Dengan segenap Willpower yang kamu miliki kamu bertriak'),nl,nl,
+	write('chikusooooooooooooo'),nl,nl,
 	write('Terimakasih sudah bermain.'), nl,
 	quit,
 	fail, !.
