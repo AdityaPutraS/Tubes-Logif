@@ -17,13 +17,13 @@ update :-
 	quit,!.
 update :-
 	(
-		(tick(T), T mod 10 =:= 0,random(1,3,Banyak),
+		(tick(T), T mod 7 =:= 0,random(2,5,Banyak),
 			generateBarang(Banyak),
 			write('Supply drop sudah datang, '),write('ada '),write(Banyak),
 			write(' barang di peta jatuh secara acak.'),nl,
 			write('Carilah! jika kau pikir kau mampu.'), nl
 		);
-		(tick(T), \+(T mod 10 =:= 0))
+		(tick(T), \+(T mod 7 =:= 0))
 	),
 	(
 		(tick(T), \+(T mod 15 =:= 14));
@@ -58,19 +58,25 @@ start :-
 	gameMain(_),
 	write('Kamu tidak bisa memulai game ketika game sudah dimulai.'), nl, !.
 start :-
-	write('PUBG.'),nl,
 	write(' _____    _    _   ____     _____ '),nl,
 	write('|  __ \\  | |  | | |  _ \\   / ____|'),nl,
 	write('| |__) | | |  | | | |_) | | |  __'),nl,
 	write('|  ___/  | |  | | |  _ <  | | |_ |'),nl,
 	write('| |      | |__| | | |_) | | |__| |'),nl,
 	write('|_|       \\____/  |____/   \\_____|'),nl,
-	write('Game Mulai'),nl,
 	write('  _   _          _   _ '),nl,
 	write(' | | | |__ __ __| | | |'),nl,
  	write(' | |_| |\\ V  V /| |_| |'),nl,
 	write('  \\___/  \\_/\\_/  \\___/ '),nl,
-	help,
+	help,nl,nl,
+	write('Pada suatu hari kamu sedang berjalan jalan ditengah jalan(yaiyalah cok, masa mau jalan di langit).'),nl,
+	write('Saat kamu sedang berjalan sambil mikirin gebetan mu, tiba-tiba ada tayo datang(Hey tayo!).'),nl,
+	write('Tayo berjalan kekanan kekiri dan tiba-tiba tayo menyenggol mu(cerita isekai ya).'),nl,
+	write('Bangun-bangun,pemain sadar bahwa pemain tidak berada di dunia dia(gimana caranya ya dia tau ini bukan dunianya dia? hmmm).'),nl,
+	write('Pemain melihat sebuah sniper_rifle yang sudah terisi dan siap digunakan.'),nl,
+	write('Pemain bertekad unt mengeksplor dunia baru ini.'),nl,
+	nl,
+	write('Game Mulai'),nl,
 	randomize,
 	init_map,
 	init_player,
