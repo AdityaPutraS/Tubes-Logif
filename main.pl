@@ -25,10 +25,10 @@ update :-
 		);
 		(tick(T), \+(T mod 10 =:= 0))
 	),
-	(	
+	(
 		(tick(T), \+(T mod 15 =:= 14));
 		(
-			tick(T), T mod 15 =:= 14, 
+			tick(T), T mod 15 =:= 14,
 			deadzone(DZ),
 			lebarPeta(L),
 			tinggiPeta(Ti),
@@ -41,7 +41,7 @@ update :-
 				write('Memandangnya fenomena tersebut dengan sebelah mata, kamu melanjutkan perjalananmu.'),nl
 			);
 			(
-				write('Sepertinya dunia tidak akan lebih mengecil lagi.'), nl	
+				write('Sepertinya dunia tidak akan lebih mengecil lagi.'), nl
 			)
 		)
 	),
@@ -125,6 +125,8 @@ save(FileName):-
 		write(armor(Arm)),write('.'), nl,
 		maxHealth(Maxh),
 		write(maxHealth(Maxh)),write('.'), nl,
+		maxInventory(Maxi),
+		write(maxInventory(Maxi)),write('.'),nl,
 		maxArmor(Maxa),
 		write(maxArmor(Maxa)),write('.'), nl,
 		gameMain(GM),
@@ -159,7 +161,7 @@ writeMusuh:-
 	!.
 writeMusuh:-
 	forall(musuh(Id,Na,X,Y,Atrib,D),(
-		write(musuh(Id,Na,X,Y,Atrib,D)),write('.'), nl	
+		write(musuh(Id,Na,X,Y,Atrib,D)),write('.'), nl
 	)), !.
 
 writeInventory:-
@@ -167,7 +169,7 @@ writeInventory:-
 	!.
 writeInventory:-
 	forall(inventory(N,A),(
-		write(inventory(N,A)),write('.'), nl	
+		write(inventory(N,A)),write('.'), nl
 	)), !.
 
 writeTerrain:-
@@ -175,7 +177,7 @@ writeTerrain:-
 	!.
 writeTerrain:-
 	forall(terrain(X,Y,Na),(
-		write(terrain(X,Y,Na)),write('.'), nl	
+		write(terrain(X,Y,Na)),write('.'), nl
 	)), !.
 
 look :-
@@ -256,7 +258,7 @@ status :-
 			),nl
 		))
 	);(
-		write(' Inventory kosong'),nl	
+		write(' Inventory kosong'),nl
 	),
 	!.
 statusWeapon :-
@@ -300,7 +302,7 @@ take(_) :-
 	write('Command ini hanya bisa dipakai setelah game dimulai.'), nl,
 	write('Gunakan command "start." untuk memulai game.'), nl, !.
 take(Object) :-
-	player(X,Y), 
+	player(X,Y),
 	\+barang(_,Object,X,Y,_), !,
 	terrain(X,Y,Ter),
 	write('Kamu mencoba mencari '),write(Object),write(' di seluruh penjuru '),write(Ter),write(' tersebut.'), nl,
@@ -366,7 +368,7 @@ drop(Object) :-
 			write('Akhirnya kamu tersadar kalau sebenarnya kamu tidak memiliki barang tersebut.'),nl
 		)
 	),
-	update,!. 
+	update,!.
 
 use(_) :-
 	\+gameMain(_),
@@ -513,9 +515,10 @@ generateBarang(Banyak) :-
     lebarPeta(Le),tinggiPeta(Ti),
 	random(1,Le,XPos),random(1,Ti,YPos),
 	(
-		/* TODO : Randomize D */
 		(isSenjata(Barang,D);isArmor(Barang,D);isAmmo(Barang,D,_);isMedicine(Barang,D);isBag(Barang,D)),
-		asserta(barang(Id,Barang,XPos,YPos,D))
+		Times2 is D*2,
+		random(D,Times2,NewD),
+		asserta(barang(Id,Barang,XPos,YPos,NewD))
 	),
     BanyakBaru is Banyak-1,
     generateBarang(BanyakBaru),!.

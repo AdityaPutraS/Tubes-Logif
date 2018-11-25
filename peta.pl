@@ -10,8 +10,8 @@
 init_map :-
     asserta(deadzone(0)),
     asserta(tick(0)),
-    random(5,20,X),
-    random(5,20,Y),
+    random(10,20,X),
+    random(10,20,Y),
     asserta(lebarPeta(X)),asserta(tinggiPeta(Y)),
     generateTerrain,!.
 
@@ -39,9 +39,9 @@ isDeadzone(X,Y) :-
     NotDZYMin is DZ+1,
     NotDZXMax is L-DZ,
     NotDZYMax is T-DZ,
-    (   
+    (
         Y < NotDZYMin;
-        Y > NotDZYMax;   
+        Y > NotDZYMax;
         X < NotDZXMin;
         X > NotDZXMax
     ),
@@ -98,14 +98,14 @@ deadzoneEnemyDeadCheck(Id,NewHP) :-
         random(Damage,Times2,DamageSenjata),
         asserta(barang(Id,Senjata,Xm,Ym,DamageSenjata)),
         write('Kamu merasakan seperti ada orang yang mati tidak jauh.'), nl,
-        write('Mungkin dia meninggalkan sesuatu sebelum pergi.'), nl  
+        write('Mungkin dia meninggalkan sesuatu sebelum pergi.'), nl
     ), !.
 deadzoneWinCheck :-
     \+musuh(_,_,_,_,_,_),
     update, !.
 deadzoneWinCheck :-
     !.
-    
+
 printPrio(X,Y) :-
     isBorderKanan(X,Y), !, write('+').
 printPrio(X,Y) :-

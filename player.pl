@@ -19,6 +19,7 @@ init_player :-
 	asserta(player(X,Y)),
 	asserta(healthpoint(100)),
 	asserta(armor(0)),
+	asserta(senjata(sniper_rifle,100,1)),
 	asserta(maxInventory(10)),
 	asserta(maxHealth(100)),
 	asserta(maxArmor(100)).
@@ -158,7 +159,7 @@ useMedicine(Nama,HPRecov):-
 	NewHP > Max ->(
 		write('Kamu mencoba mengobati dirimu agar lebih fit dari biasanya, tapi gagal.'), nl,
 		write('Karena Max HP kamu cuma '), write(Max), write(','), nl,
-		write('HP kamu cuma bertambah '),write(BedaHP), write(' dengan menggunakan '),write(Nama), write('.'), nl, 	
+		write('HP kamu cuma bertambah '),write(BedaHP), write(' dengan menggunakan '),write(Nama), write('.'), nl,
 		retract(healthpoint(_)),asserta(healthpoint(Max))
 	);
 	(
@@ -198,7 +199,7 @@ equipArmor(Nama,_):-
 	write('Kamu tidak bisa memakai armor tambahan lagi.'), nl,
 	write('Kamu mengembalikan '),write(Nama),write(' ke dalam inventory.'), nl,
 	!.
-	
+
 equipArmor(Nama, ArmorPoint):-
 	armor(CurArmor),
 	maxArmor(Max),
@@ -209,7 +210,7 @@ equipArmor(Nama, ArmorPoint):-
 		write('Kamu mencoba memakai '),write(Nama),write('...'), nl,
 		write('Tetapi kamu tidak bisa bergerak ketika memakainya.'), nl,
 		write('Akhirnya kamu menghancurkan sebagian dari '),write(Nama),write(' agar bisa bergerak ketika memakainya.'), nl,
-		write('Armor kamu hanya bertambah '),write(BedaArmor), write(' dengan menggunakan '),write(Nama), write('.'), nl, 	
+		write('Armor kamu hanya bertambah '),write(BedaArmor), write(' dengan menggunakan '),write(Nama), write('.'), nl,
 		retract(armor(_)),asserta(armor(Max))
 	);
 	(
@@ -233,7 +234,7 @@ equipBag(Nama, Kapasitas) :-
 	write(Kapasitas), write(' barang lebih banyak daripada sebelumnya.'), nl,
 	!.
 
-kalah :- 
+kalah :-
 	write('Kamu kalah, tapi percayalah bahwa suatu saat kamu akan menang.'), nl,
 	write('Terimakasih sudah bermain.'), nl,
 	quit,
@@ -252,15 +253,15 @@ narratePlayer :-
 	terrain(X,Y,NamaTerrain),
 	write('Kamu berada di sebuah '), write(NamaTerrain), write('.'), nl,
 	forall(barang(_,NamaBarang,X,Y,_), (
-		write('    Di tempat ini, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+		write('    Di tempat ini, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl
 	)),
 	findall(Id, musuh(Id,X,Y,_,_,_), ListMusuh),
 	length(ListMusuh, BanyakMusuh),
 	BanyakMusuh>0->(
-		write('    Di tempat ini, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+		write('    Di tempat ini, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl
 	);
 	(
-		write('    Di tempat ini sepertinya tidak ada musuh.'), nl	
+		write('    Di tempat ini sepertinya tidak ada musuh.'), nl
 	),
 	!.
 
@@ -271,16 +272,16 @@ narrateNorth :-
 		terrain(X,YNorth,NamaTerrain),
 		write('Di arah utara ada sebuah '), write(NamaTerrain), write('.'), nl,
 		forall(barang(_,NamaBarang,X,YNorth,_), (
-			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl
 		)),
 		narrateDeadzone(X,YNorth),
 		findall(Id, musuh(Id,X,YNorth,_,_,_), ListMusuh),
 		length(ListMusuh, BanyakMusuh),
 		BanyakMusuh>0->(
-			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl
 		);
 		(
-			write('')	
+			write('')
 		)
 	);
 	(
@@ -297,16 +298,16 @@ narrateSouth :-
 		terrain(X,YSouth,NamaTerrain),
 		write('Di arah selatan ada sebuah '), write(NamaTerrain), write('.'), nl,
 		forall(barang(_,NamaBarang,X,YSouth,_), (
-			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl
 		)),
 		narrateDeadzone(X,YSouth),
 		findall(Id, musuh(Id,X,YSouth,_,_,_), ListMusuh),
 		length(ListMusuh, BanyakMusuh),
 		BanyakMusuh>0->(
-			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl
 		);
 		(
-			write('')	
+			write('')
 		)
 	);
 	(
@@ -322,7 +323,7 @@ narrateWest :-
 		terrain(XWest,Y,NamaTerrain),
 		write('Di arah barat ada sebuah '), write(NamaTerrain), write('.'), nl,
 		forall(barang(_,NamaBarang,XWest,Y,_), (
-			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl
 		)),
 		narrateDeadzone(XWest,Y),
 		findall(Id, musuh(Id,XWest,Y,_,_,_), ListMusuh),
@@ -331,7 +332,7 @@ narrateWest :-
 			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl
 		);
 		(
-			write('')	
+			write('')
 		)
 	);
 	(
@@ -348,16 +349,16 @@ narrateEast :-
 		terrain(XEast,Y,NamaTerrain),
 		write('Di arah timur ada sebuah '), write(NamaTerrain), write('.'), nl,
 		forall(barang(_,NamaBarang,XEast,Y,_), (
-			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl	
+			write('    Di arah sana, kamu melihat ada sebuah '), write(NamaBarang), write('.'), nl
 		)),
 		narrateDeadzone(XEast,Y),
 		findall(Id, musuh(Id,XEast,Y,_,_,_), ListMusuh),
 		length(ListMusuh, BanyakMusuh),
 		BanyakMusuh>0->(
-			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl	
+			write('    Di arah sana, kamu melihat ada '), write(BanyakMusuh), write(' orang musuh.'), nl
 		);
 		(
-			write('')	
+			write('')
 		)
 	);
 	(

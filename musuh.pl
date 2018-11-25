@@ -33,7 +33,7 @@ tentukanAksi(Id,Mov) :-
 tentukanAksi(_,Mov) :-
     Mov > 74, !.
 tentukanAksi(Id,Mov) :-
-    Mov > 25, 
+    Mov > 25,
     randomMusuh(Id),
     !.
 tentukanAksi(Id,_) :-
@@ -45,7 +45,7 @@ tentukanAksi(Id,_) :-
     random(1,100,Gerak), G is (Gerak mod 2),
     (
         (G =:= 0, nMusuh(Id));
-        (G =:= 1)    
+        (G =:= 1)
     ),!.
 tentukanAksi(Id,_) :-
     musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
@@ -53,7 +53,7 @@ tentukanAksi(Id,_) :-
     random(1,100,Gerak), G is (Gerak mod 2),
     (
         (G =:= 0, sMusuh(Id));
-        (G =:= 1)    
+        (G =:= 1)
     ),!.
 tentukanAksi(Id,_) :-
     musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
@@ -61,7 +61,7 @@ tentukanAksi(Id,_) :-
     random(1,100,Gerak), G is (Gerak mod 2),
     (
         (G =:= 0, eMusuh(Id));
-        (G =:= 1)    
+        (G =:= 1)
     ),!.
 tentukanAksi(Id,_) :-
     musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
@@ -69,7 +69,7 @@ tentukanAksi(Id,_) :-
     random(1,100,Gerak), G is (Gerak mod 2),
     (
         (G =:= 0, wMusuh(Id));
-        (G =:= 1)    
+        (G =:= 1)
     ),!.
 tentukanAksi(Id,_) :-
     musuh(Id,Xm,Ym,_,_,_),player(Xp,Yp),
@@ -108,7 +108,7 @@ tentukanAksi(Id,_) :-
         (G =:= 2)
     ),!.
 
-nMusuh(Id) :- 
+nMusuh(Id) :-
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     Ym > 1,
     YmBaru is Ym-1,
@@ -116,7 +116,7 @@ nMusuh(Id) :-
     assertz(musuh(Id,Xm,YmBaru,Damage,Health,ItemDrop)),!.
 nMusuh(Id) :-
     sMusuh(Id),!.
-eMusuh(Id) :- 
+eMusuh(Id) :-
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     lebarPeta(Le),
     Xm < Le,
@@ -125,7 +125,7 @@ eMusuh(Id) :-
     assertz(musuh(Id,XmBaru,Ym,Damage,Health,ItemDrop)),!.
 eMusuh(Id) :-
     wMusuh(Id),!.
-wMusuh(Id) :- 
+wMusuh(Id) :-
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     Xm > 1,
     XmBaru is Xm-1,
@@ -133,7 +133,7 @@ wMusuh(Id) :-
     assertz(musuh(Id,XmBaru,Ym,Damage,Health,ItemDrop)),!.
 wMusuh(Id) :-
     eMusuh(Id),!.
-sMusuh(Id) :- 
+sMusuh(Id) :-
     musuh(Id,Xm,Ym,Damage,Health,ItemDrop),
     tinggiPeta(Ti),
     Ym < Ti,
@@ -185,7 +185,7 @@ serangPlayer(Damage) :-
             write('Armormu hancur melindungimu'),nl);
         (ArmorBaru > 0,write('Armormu melindungimu, sisa armormu : '),write(ArmorBaru),nl)
     ),!.
-serangPlayer(Damage) :- 
+serangPlayer(Damage) :-
     healthpoint(Darah),
     armor(Armor),
     Armor > 0, Armor =< Damage,
@@ -197,31 +197,31 @@ serangPlayer(Damage) :-
 serangPlayer(Damage) :-
     healthpoint(Darah),
     (
-        (   Darah > Damage, 
+        (   Darah > Damage,
             DarahBaru is Darah-Damage,
             retract(healthpoint(_)),asserta(healthpoint(DarahBaru)),
             write('Kamu baru saja diserang musuh, sisa darahmu : '),write(DarahBaru),nl
         );
         (   Darah =< Damage,
             write('Darahmu habis terkena serangan musuh, kamu mati'),nl,
-            kalah   
+            kalah
         )
-    ),!. 
+    ),!.
 
 serangMusuh([]) :- !.
 serangMusuh(_) :-
     senjata(_,_,BanyakAm),
     BanyakAm =:= 0,
     write('Ammo-mu tidak cukup untuk menyerang musuh'),nl,!.
-serangMusuh([Id|Tail]) :- 
+serangMusuh([Id|Tail]) :-
     musuh(Id,_,_,_,DarahM,SenjataMusuh),
     senjata(Senjata,Damage,BanyakAm),
     BanyakAm > 0,
-        BanyakAmBaru is BanyakAm-1,
-        retract(senjata(Senjata,Damage,BanyakAm)),
-        asserta(senjata(Senjata,Damage,BanyakAmBaru)),
     isSenjata(SenjataMusuh,DamageMusuh),
     DarahM > Damage,
+    BanyakAmBaru is BanyakAm-1,
+    retract(senjata(Senjata,Damage,BanyakAm)),
+    asserta(senjata(Senjata,Damage,BanyakAmBaru)),
     DarahMBaru is DarahM-Damage,
     retract(musuh(Id,Xm,Ym,DamM,_,SenjataMusuh)),
     asserta(musuh(Id,Xm,Ym,DamM,DarahMBaru,SenjataMusuh)),
@@ -242,7 +242,7 @@ serangMusuh([Id|Tail]) :-
     retract(musuh(Id,Xm,Ym,Dam,_,_)),
     between(1,500,IdB),\+barang(IdB,_,_,_,_),
     isSenjata(SenjataMusuh,_),
-    Times2 is (Dam * 2),
-    random(Dam,Times2,DamageSenjata),
+    Times3 is (Dam * 3),
+    random(Dam,Times3,DamageSenjata),
     asserta(barang(Id,SenjataMusuh,Xm,Ym,DamageSenjata)),
     serangMusuh(Tail),!.
