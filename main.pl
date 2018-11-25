@@ -14,7 +14,6 @@ update :-
 	sudahMenang(Menang),Menang == true,
 	write('Selamat, kamu menang'),nl,
 	write('Terimakasih sudah bermain'), nl,
-	write('Arigatou! UwU'), nl,
 	quit,!.
 update :-
 	(
@@ -99,10 +98,12 @@ help :-
 	write('16. help : Menampilkan ini lagi.'),nl,
 	write('Catatan : Semua command di atas diakhiri titik (Misal : "help.")'), nl, !.
 
+loads(_) :-
+	gameMain(_),
+	write('Kamu tidak bisa memulai game lainnya ketika ada game yang sudah dimulai.'), nl, !.
 loads(FileName):-
 	\+file_exists(FileName),
 	write('File tersebut tidak ada.'), nl, !.
-	
 loads(FileName):-
 	open(FileName, read, Str),
     read_file_lines(Str,Lines),
@@ -239,9 +240,7 @@ status :-
 status :-
 	write('Health             : '),healthpoint(Darah),write(Darah),nl,
 	write('Armor              : '),armor(ArmorP),write(ArmorP),nl,
-	write('Tipe Senjata       : '),senjata(Sen,Dam,Ammo),write(Sen),nl,
-	write('Damage Senjata     : '),write(Dam),nl,
-	write('Banyak Ammo        : '),write(Ammo),write(' peluru'),nl,
+	statusWeapon,
 	write('Kapasitas inventory: '),maxInventory(MaxInv),write(MaxInv),write(' barang'), nl,
 	write('Isi inventory      : '),nl,
 	inventory(_,_)->(
@@ -259,6 +258,18 @@ status :-
 	);(
 		write(' Inventory kosong'),nl	
 	),
+	!.
+statusWeapon :-
+	senjata(Sen,Dam,Ammo),
+	write('Tipe Senjata       : '),write(Sen),nl,
+	write('Damage Senjata     : '),write(Dam),nl,
+	write('Banyak Ammo        : '),write(Ammo),write(' peluru'),nl,
+	!.
+statusWeapon :-
+	\+senjata(_,_,_),
+	write('Tipe Senjata       : Tidak ada'),nl,
+	write('Damage Senjata     : Tidak ada'),nl,
+	write('Banyak Ammo        : Tidak ada'), nl,
 	!.
 
 attack :-

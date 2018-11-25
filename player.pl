@@ -36,6 +36,7 @@ quit :-
 	retract(maxArmor(_)),
 	retract(maxInventory(_)),
 	write('Game selesai.'),nl,
+	write('Arigatou! UwU'), nl,
 	retract(gameMain(_)),
     retract(deadzone(_)),
     retract(tick(_)),
@@ -235,7 +236,6 @@ equipBag(Nama, Kapasitas) :-
 kalah :- 
 	write('Kamu kalah, tapi percayalah bahwa suatu saat kamu akan menang.'), nl,
 	write('Terimakasih sudah bermain.'), nl,
-	write('Arigatou! UwU'), nl,
 	quit,
 	fail, !.
 
