@@ -155,7 +155,6 @@ useMedicine(Nama,HPRecov):-
 	maxHealth(Max),
 	NewHP is CurHP + HPRecov,
 	BedaHP is Max - CurHP,
-	write('HP Awal :(Luar Loop) '), write(CurHP), nl,
 	NewHP > Max ->(
 		write('Kamu mencoba mengobati dirimu agar lebih fit dari biasanya, tapi gagal.'), nl,
 		write('Karena Max HP kamu cuma '), write(Max), write(','), nl,
@@ -165,7 +164,6 @@ useMedicine(Nama,HPRecov):-
 	(
 		healthpoint(CurHP),
 		NewHP is CurHP + HPRecov,
-		write('HP Awal :'), write(CurHP), nl,
 		write('HP kamu bertambah '),write(HPRecov), write(' dengan menggunakan '),write(Nama), write('.'), nl,
 		write('HP kamu sekarang '), write(NewHP), write('.'), nl,
 		retract(healthpoint(_)),asserta(healthpoint(NewHP))
